@@ -19,38 +19,39 @@ const _request = async (url, { method = 'GET', body = {}, params = {}, headers =
 }
 
 /**
- * Guarantees that object returned has truthy value for exactly one of `data`,
- * `error`, and `exception` keys.
+ * Returns object with truthy value for exactly one of `data`, `error`, and
+ * `exception` keys, along with other response properties.
  */
 const request = async (url, params = {}) => {
   try {
     const r = await _request(url, params)
-    const { status, headers } = r
+    const { headers, status, statusText, redirected, url: rUrl, type } = r
+    const fields = { headers, status, statusText, redirected, url: rUrl, type }
 
-    let data
+    let json
     try {
-      data = await r.json() || {}
+      json = await r.json() || {}
     } catch (exception) {
-      data = {}
+      json = {}
     }
 
-    if (status >= 400) return { error: data, status, headers }
-    return { data, status, headers }
+    if (status >= 400) return { ...fields, error: json }
+    return { ...fields, data: json }
   } catch (exception) {
     return { exception }
   }
 }
 
 /**
- * Calls `requester`. If there's no connection error, passes response to
- * `onResponse`. Else calls requester again, backing off exponentially.
+ * Calls `requester`. If there's no exception (connection error), passes response
+ * to `onResponse`. Else calls requester again, backing off exponentially.
  */
 const requestBackoff = async (requester, onResponse, { retries = 3, initialDelay = 1000, multiplier = 2 } = {}) => {
   let count = 0
   let delay = initialDelay
   const inner = async () => {
     const response = await requester()
-    onResponse(response)
+    if (onResponse) onResponse(response)
 
     if (response.exception) {
       if (count >= retries) return
