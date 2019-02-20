@@ -1,0 +1,32 @@
+{
+  "name": "request.js",
+  "version": "0.1.0",
+  "author": "Kyle Bebak <kylebebak@gmail.com>",
+  "description": "React file dropzone and uploader: fully customizable, progress indicators, upload cancellation and restart, zero deps",
+  "main": "./dist/request.js",
+  "module": "./dist/request.umd.js",
+  "keywords": [
+    "fetch",
+    "request",
+    "JSON",
+    "backoff"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fortana-co/request.js.git"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "whatwg-fetch": "^2.0.2",
+    "qs": "^6.5.2"
+  },
+  "devDependencies": {
+    "ava": "^1.2.1",
+    "whatwg-fetch": "^2.0.2",
+    "qs": "^6.5.2"
+  },
+  "scripts": {
+    "test": "ava"
+  },
+  "dependencies": {}
+}

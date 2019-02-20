@@ -22,15 +22,15 @@ const _request = async (url, { method = 'GET', body = {}, params = {}, headers =
  * Returns object with truthy value for exactly one of `data`, `error`, and
  * `exception` keys, along with other response properties.
  */
-const request = async (url, params = {}) => {
+const request = async (url, options = {}) => {
   try {
-    const r = await _request(url, params)
-    const { headers, status, statusText, redirected, url: rUrl, type } = r
-    const fields = { headers, status, statusText, redirected, url: rUrl, type }
+    const response = await _request(url, options)
+    const { headers, status, statusText, redirected, url: resUrl, type } = response
+    const fields = { headers, status, statusText, redirected, url: resUrl, type }
 
     let json
     try {
-      json = await r.json() || {}
+      json = await response.json() || {}
     } catch (exception) {
       json = {}
     }
