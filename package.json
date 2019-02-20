@@ -1,10 +1,9 @@
 {
-  "name": "request.js",
+  "name": "request-dot-js",
   "version": "0.1.0",
   "author": "Kyle Bebak <kylebebak@gmail.com>",
   "description": "React file dropzone and uploader: fully customizable, progress indicators, upload cancellation and restart, zero deps",
-  "main": "./dist/request.js",
-  "module": "./dist/request.umd.js",
+  "main": "./index.js",
   "keywords": [
     "fetch",
     "request",
@@ -22,8 +21,9 @@
   },
   "devDependencies": {
     "ava": "^1.2.1",
-    "whatwg-fetch": "^2.0.2",
-    "qs": "^6.5.2"
+    "node-fetch": "^2.3.0",
+    "qs": "^6.5.2",
+    "whatwg-fetch": "^2.0.2"
   },
   "scripts": {
     "test": "ava"

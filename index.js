@@ -1,5 +1,7 @@
-import 'whatwg-fetch'
-import qs from 'qs'
+require('whatwg-fetch')
+const qs = require('qs')
+
+const fetch = typeof window === 'undefined' ? require('node-fetch') : window.fetch
 
 const toQs = (params) => {
   const s = qs.stringify(params)
@@ -10,7 +12,7 @@ const _request = async (url, { method = 'GET', body = {}, params = {}, headers =
   const options = {
     method,
     body: JSON.stringify(body), // `body` must be a string, not an object
-    headers: new Headers({ ...headers, 'Content-Type': 'application/json', Accept: 'application/json' }),
+    headers: { ...headers, 'Content-Type': 'application/json', Accept: 'application/json' },
   }
 
   if (['GET', 'HEAD'].indexOf(method) > -1) delete options.body
@@ -63,5 +65,6 @@ const requestBackoff = async (requester, onResponse, { retries = 3, initialDelay
   inner()
 }
 
-export default request
-export { toQs, requestBackoff }
+module.exports = request
+module.exports.requestBackoff = requestBackoff
+module.exports.toQs = toQs
