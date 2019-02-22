@@ -16,14 +16,14 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "whatwg-fetch": "^2.0.2",
+    "whatwg-fetch": ">=2.0.2",
     "qs": "^6.5.2"
   },
   "devDependencies": {
     "ava": "^1.2.1",
     "node-fetch": "^2.3.0",
     "qs": "^6.5.2",
-    "whatwg-fetch": "^2.0.2"
+    "whatwg-fetch": ">=2.0.2"
   },
   "scripts": {
     "test": "ava"
