@@ -11,11 +11,12 @@ const toQs = (params) => {
   return s ? `?${s}` : ''
 }
 
-const _request = async (url, { method = 'GET', body = {}, params = {}, headers = {} } = {}) => {
+const _request = async (url, { method = 'GET', body = {}, params = {}, headers = {}, ...rest } = {}) => {
   const options = {
     method,
-    body: JSON.stringify(body), // `body` must be a string, not an object
-    headers: { ...headers, 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: headers['Content-Type'] === 'application/json' ? JSON.stringify(body) : body,
+    headers,
+    ...rest,
   }
 
   if (['GET', 'HEAD'].indexOf(method) > -1) delete options.body
@@ -27,21 +28,27 @@ const _request = async (url, { method = 'GET', body = {}, params = {}, headers =
  * Returns object with truthy value for exactly one of `data`, `error`, and
  * `exception` keys, along with other response properties.
  */
-const request = async (url, options = {}) => {
-  try {
-    const response = await _request(url, options)
-    const { headers, status, statusText, redirected, url: resUrl, type } = response
-    const fields = { headers, status, statusText, redirected, url: resUrl, type }
+const request = async (url, { headers: hdrs = {}, ...rest } = {}) => {
+  const headers = { 'Content-Type': 'application/json', Accept: 'application/json', ...hdrs }
 
-    let json
-    try {
-      json = await response.json() || {}
-    } catch (exception) {
-      json = {}
+  try {
+    const response = await _request(url, { headers, ...rest })
+    const { headers: responseHeaders, status, statusText, redirected, url: responseUrl, type } = response
+    const fields = { headers: responseHeaders, status, statusText, redirected, url: responseUrl, type }
+
+    let content
+    if (headers.Accept === 'application/json') {
+      try {
+        content = await response.json() || {}
+      } catch (exception) {
+        content = {}
+      }
+    } else {
+      content = await response.text() || '{}'
     }
 
-    if (status >= 400) return { ...fields, error: json }
-    return { ...fields, data: json }
+    if (status >= 400) return { ...fields, error: content }
+    return { ...fields, data: content }
   } catch (exception) {
     return { exception }
   }
@@ -49,7 +56,7 @@ const request = async (url, options = {}) => {
 
 /**
  * Calls `requester`. If there's no exception (connection error), passes response
- * to `onResponse`. Else calls requester again, backing off exponentially.
+ * to `onResponse`. Else calls `requester` again, backing off exponentially.
  */
 const requestBackoff = async (requester, onResponse, { retries = 3, initialDelay = 1000, multiplier = 2 } = {}) => {
   let count = 0
@@ -58,7 +65,7 @@ const requestBackoff = async (requester, onResponse, { retries = 3, initialDelay
     const response = await requester()
     if (onResponse) onResponse(response)
 
-    if (response.exception) {
+    if (response && response.exception) {
       if (count >= retries) return
       setTimeout(inner, delay)
       delay *= multiplier
