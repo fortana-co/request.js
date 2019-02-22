@@ -2,7 +2,8 @@ require('whatwg-fetch')
 const qs = require('qs')
 
 let fetch
-if (typeof window === 'undefined') fetch = require('node-fetch')
+const req = (module) => require(module)
+if (typeof window === 'undefined') fetch = req('node-fetch')
 else fetch = window.fetch
 
 const toQs = (params) => {
