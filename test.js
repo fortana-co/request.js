@@ -2,18 +2,31 @@ import test from 'ava'
 import request, { requestBackoff, toQs } from '.'
 
 // request
+test('request: redirect', async t => {
+  const { data, status } = await request('https://httpbin.org/redirect-to?url=get')
+  t.is(data.url, 'https://httpbin.org/get')
+  t.is(status, 200)
+  t.pass()
+})
+
+test('request: redirect manual', async t => {
+  const { data, status } = await request('https://httpbin.org/redirect-to?url=get', { redirect: 'manual' })
+  t.deepEqual(data, {})
+  t.is(status, 302)
+})
+
 test('request: default headers', async t => {
-  const { data: { headers, url }, error, exception } = await request('https://httpbin.org/get')
-  t.is(url, 'https://httpbin.org/get')
-  t.is(headers['Content-Type'], 'application/json')
-  t.is(headers.Accept, 'application/json')
+  const { data, error, exception } = await request('https://httpbin.org/get')
+  t.is(data.url, 'https://httpbin.org/get')
+  t.is(data.headers['Content-Type'], 'application/json')
+  t.is(data.headers.Accept, 'application/json')
   t.is(error, undefined)
   t.is(exception, undefined)
 })
 
 test('request: querystring', async t => {
-  const { data: { url } } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd' } })
-  t.is(url, 'https://httpbin.org/get?a=b&c=d')
+  const { data } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd' } })
+  t.is(data.url, 'https://httpbin.org/get?a=b&c=d')
 })
 
 test('request: json body', async t => {

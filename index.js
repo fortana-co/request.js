@@ -33,8 +33,8 @@ const request = async (url, { headers: hdrs = {}, ...rest } = {}) => {
 
   try {
     const response = await _request(url, { headers, ...rest })
-    const { headers: responseHeaders, status, statusText, redirected, url: responseUrl, type } = response
-    const fields = { headers: responseHeaders, status, statusText, redirected, url: responseUrl, type }
+    const { status, statusText, headers: responseHeaders, url: responseUrl } = response
+    const fields = { status, statusText, headers: responseHeaders, url: responseUrl }
 
     let content
     if (headers.Accept === 'application/json') {

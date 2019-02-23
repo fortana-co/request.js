@@ -46,7 +46,12 @@ In the examples above, exactly one of `data`, `error` or `exception` will be tru
 
 If there is a connection error or timeout, it's `exception`.
 
-`rest` contains other attributes [returned by fetch](https://devhints.io/js-fetch), such as `headers`, `status`, `statusText`, `redirected`, `url`, and `type`.
+`rest` contains a few other attributes in the `Response` object returned by `fetch`:
+
+- `headers`
+- `status`
+- `statusText`
+- `url`
 
 
 ### JSON by default
