@@ -1,8 +1,8 @@
 {
   "name": "request-dot-js",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "author": "Kyle Bebak <kylebebak@gmail.com>",
-  "description": "React file dropzone and uploader: fully customizable, progress indicators, upload cancellation and restart, zero deps",
+  "description": "A ~1kB wrapper around fetch, with a convenient API for interacting with JSON APIs and support for exponential backoff",
   "main": "./index.js",
   "keywords": [
     "fetch",
@@ -28,7 +28,7 @@
     "whatwg-fetch": ">=2.0.2"
   },
   "scripts": {
-    "test": "eslint index.js && ava"
+    "test": "eslint index.js && ava -v"
   },
   "dependencies": {}
 }

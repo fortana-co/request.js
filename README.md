@@ -23,6 +23,8 @@ API: `async request(url[, options])`
 ~~~js
 import request from 'request-dot-js'
 
+// in your async function...
+
 const { data, error, exception, ...rest } = await request(
   'https://httpbin.org/get',
   {
@@ -65,14 +67,14 @@ import request, { requestBackoff } from 'request-dot-js'
 
 requestBackoff(
   () => request('https://httpbin.org/get'),
-  ({ data, error, exception, ...rest }) => { console.log(data, error, exception, ...rest) },
+  ({ data, error, exception }, count) => { console.log(data, error, exception, count) },
   { retries: 5, initialDelay: 500, multiplier: 2 },
 )
 ~~~
 
 `requestBackoff` invokes `requester`, which can be async. If `requester` returns an object that has a truthy value for the `exception` key, it backs off and retries the request.
 
-Each time it invokes `requester`, it also passes the return value of `requester` to `onResponse`.
+Each time it invokes `requester`, it also passes the return value of `requester` to `onResponse`, and the number of times (`count`) that `requester` has been invoked.
 
 The return value of `request`, the default method in this package, combines nicely with the `requestBackoff` function, as you can see in the example above.
 

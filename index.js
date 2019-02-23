@@ -63,7 +63,7 @@ const requestBackoff = async (requester, onResponse, { retries = 3, initialDelay
   let delay = initialDelay
   const inner = async () => {
     const response = await requester()
-    if (onResponse) onResponse(response)
+    if (onResponse) onResponse(response, count + 1)
 
     if (response && response.exception) {
       if (count >= retries) return
