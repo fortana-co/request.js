@@ -47,7 +47,7 @@ const request = async (url, { headers: hdrs = {}, ...rest } = {}) => {
       content = await response.text() || '{}'
     }
 
-    if (status >= 400) return { ...fields, error: content }
+    if (status >= 300) return { ...fields, error: content }
     return { ...fields, data: content }
   } catch (exception) {
     return { exception }

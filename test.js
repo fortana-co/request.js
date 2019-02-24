@@ -10,8 +10,8 @@ test('request: redirect', async t => {
 })
 
 test('request: redirect manual', async t => {
-  const { data, status } = await request('https://httpbin.org/redirect-to?url=get', { redirect: 'manual' })
-  t.deepEqual(data, {})
+  const { error, status } = await request('https://httpbin.org/redirect-to?url=get', { redirect: 'manual' })
+  t.deepEqual(error, {})
   t.is(status, 302)
 })
 

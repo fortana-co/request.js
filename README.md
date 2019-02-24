@@ -42,7 +42,7 @@ const { data, error, exception, ...rest } = await request(
 )
 ~~~
 
-In the examples above, exactly one of `data`, `error` or `exception` will be truthy. If there is no connection error, and response status is less than 400, it's `data`, else it's `error`.
+In the examples above, exactly one of `data`, `error` or `exception` will be truthy. If there is no connection error, and response status is less than 300, it's `data`, else it's `error`.
 
 If there is a connection error or timeout, it's `exception`.
 
