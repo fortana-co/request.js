@@ -6,6 +6,10 @@ const req = (module) => require(module)
 if (typeof window === 'undefined') fetch = req('node-fetch')
 else fetch = window.fetch
 
+const timeout = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 const toQs = (params) => {
   const s = qs.stringify(params)
   return s ? `?${s}` : ''
@@ -28,7 +32,7 @@ const _request = async (url, { method = 'GET', body = {}, params = {}, headers =
  * Returns object with truthy value for exactly one of `data`, `error`, and
  * `exception` keys, along with other response properties.
  */
-const request = async (url, { headers: hdrs = {}, ...rest } = {}) => {
+const request = async (url, { headers: hdrs = {}, ...rest } = {}, backoff) => {
   const headers = { 'Content-Type': 'application/json', Accept: 'application/json', ...hdrs }
 
   try {
@@ -50,31 +54,19 @@ const request = async (url, { headers: hdrs = {}, ...rest } = {}) => {
     if (status >= 300) return { ...fields, error: content }
     return { ...fields, data: content }
   } catch (exception) {
+    if (backoff) {
+      const { retries = 3, delay = 1000, multiplier = 2, onRetry } = backoff
+      if (retries > 0) {
+        if (onRetry) onRetry({ exception }, { retries, delay, multiplier, onRetry })
+        await timeout(delay)
+
+        const nextBackoff = { retries: retries - 1, delay: delay * multiplier, multiplier, onRetry }
+        return request(url, { headers, ...rest }, nextBackoff)
+      }
+    }
     return { exception }
   }
 }
 
-/**
- * Calls `requester`. If there's no exception (connection error), passes response
- * to `onResponse`. Else calls `requester` again, backing off exponentially.
- */
-const requestBackoff = async (requester, onResponse, { retries = 3, initialDelay = 1000, multiplier = 2 } = {}) => {
-  let count = 0
-  let delay = initialDelay
-  const inner = async () => {
-    const response = await requester()
-    if (onResponse) onResponse(response, count + 1)
-
-    if (response && response.exception) {
-      if (count >= retries) return
-      setTimeout(inner, delay)
-      delay *= multiplier
-      count += 1
-    }
-  }
-  inner()
-}
-
 module.exports = request
-module.exports.requestBackoff = requestBackoff
 module.exports.toQs = toQs

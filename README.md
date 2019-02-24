@@ -18,7 +18,7 @@ Peer deps are [__whatwg-fetch__](https://github.com/github/fetch) (not needed if
 
 
 ## Usage
-API: `async request(url[, options])`
+API: `async request(url[, options[, backoffOptions]])`
 
 ~~~js
 import request from 'request-dot-js'
@@ -48,10 +48,10 @@ If there is a connection error or timeout, it's `exception`.
 
 `rest` contains a few other attributes in the `Response` object returned by `fetch`:
 
-- `headers`
-- `status`
-- `statusText`
-- `url`
+- `headers`: object literal with headers, like axios
+- `status`: 200, 204, etc...
+- `statusText`: 'OK', 'CREATED', etc...
+- `url`: url after redirect(s)
 
 
 ### JSON by default

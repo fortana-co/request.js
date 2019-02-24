@@ -1,7 +1,7 @@
 import test from 'ava'
-import request, { requestBackoff, toQs } from '.'
+import request, { toQs } from '.'
 
-// request
+request
 test('request: redirect', async t => {
   const { data, status } = await request('https://httpbin.org/redirect-to?url=get')
   t.is(data.url, 'https://httpbin.org/get')
@@ -60,35 +60,38 @@ test('request: exception', async t => {
   t.is(error, undefined)
 })
 
+// request backoff
+test.cb('backoff: retries on exception', t => {
+  t.plan(4)
+
+  const onRetry = ({ exception }, { retries, delay }) => {
+    t.truthy(exception)
+    if (retries <= 1) {
+      t.is(delay, 500)
+      t.end()
+    }
+  }
+  request('https://httpbin.smorg/get', {}, { onRetry, delay: 125 })
+})
+
+test('backoff: eventually returns response', async t => {
+  const { exception } = await request('https://httpbin.smorg/get', {}, { delay: 250 })
+  t.truthy(exception)
+})
+
+test.cb('backoff: callback style', t => {
+  t.plan(1)
+
+  request('https://httpbin.smorg/get', {}, { delay: 250 }).then(({ exception }) => {
+    t.truthy(exception)
+    t.end()
+  })
+})
+
 // toQs
-test('toQs: works', async t => {
+test('toQs: simple', async t => {
   let qs = toQs({ a: 'b', c: 'd' })
   t.is(qs, '?a=b&c=d')
   qs = toQs({})
   t.is(qs, '')
-})
-
-// requestBackoff
-test.cb('requestBackoff: passes response to onResponse', t => {
-  t.plan(1)
-
-  const onResponse = ({ data }) => {
-    t.is(data.url, 'https://httpbin.org/get')
-    t.end()
-  }
-  requestBackoff(() => request('https://httpbin.org/get'), onResponse)
-})
-
-test.cb('requestBackoff: retries on exception', t => {
-  t.plan(3)
-
-  const onResponse = ({ exception }, count) => {
-    t.truthy(exception)
-    if (count >= 3) t.end()
-  }
-  requestBackoff(
-    () => request('https://httpbin.smorg/get'),
-    onResponse,
-    { retries: 2, initialDelay: 250, multiplier: 2 },
-  )
 })
