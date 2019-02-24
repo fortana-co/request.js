@@ -1,6 +1,6 @@
 {
   "name": "request-dot-js",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "author": "Kyle Bebak <kylebebak@gmail.com>",
   "description": "A ~1kB wrapper around fetch, with a convenient API for interacting with JSON APIs and support for exponential backoff",
   "main": "./index.js",
@@ -15,20 +15,14 @@
     "url": "git://github.com/fortana-co/request.js.git"
   },
   "license": "MIT",
-  "peerDependencies": {
-    "whatwg-fetch": ">=2.0.2",
-    "qs": "^6.5.2"
-  },
   "devDependencies": {
     "ava": "^1.2.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.14.1",
-    "node-fetch": "^2.3.0",
-    "qs": "^6.5.2",
-    "whatwg-fetch": ">=2.0.2"
+    "node-fetch": "^2.3.0"
   },
   "scripts": {
-    "test": "eslint index.js && ava -v"
+    "test": "eslint index.js stringify.js && ava -v"
   },
   "dependencies": {}
 }

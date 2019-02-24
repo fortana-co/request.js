@@ -1,7 +1,6 @@
 import test from 'ava'
-import request, { toQs } from '.'
+import request from '.'
 
-request
 test('request: redirect', async t => {
   const { data, status } = await request('https://httpbin.org/redirect-to?url=get')
   t.is(data.url, 'https://httpbin.org/get')
@@ -44,6 +43,11 @@ test('request: custom headers', async t => {
   t.deepEqual(parsed.json, { a: 'b', c: 'd' })
 })
 
+test('request: headers returned as object literal', async t => {
+  const { headers } = await request('https://httpbin.org/get')
+  t.is(headers['content-encoding'], 'gzip')
+})
+
 test('request: error', async t => {
   const { data, error, exception, status } = await request('https://httpbin.org/GET')
   t.is(status, 404)
@@ -60,7 +64,7 @@ test('request: exception', async t => {
   t.is(error, undefined)
 })
 
-// request backoff
+// backoff
 test.cb('backoff: retries on exception', t => {
   t.plan(4)
 
@@ -86,12 +90,4 @@ test.cb('backoff: callback style', t => {
     t.truthy(exception)
     t.end()
   })
-})
-
-// toQs
-test('toQs: simple', async t => {
-  let qs = toQs({ a: 'b', c: 'd' })
-  t.is(qs, '?a=b&c=d')
-  qs = toQs({})
-  t.is(qs, '')
 })

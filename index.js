@@ -1,5 +1,4 @@
-require('whatwg-fetch')
-const qs = require('qs')
+const stringify = require('./stringify')
 
 let fetch
 const req = (module) => require(module)
@@ -11,8 +10,14 @@ const timeout = (ms) => {
 }
 
 const toQs = (params) => {
-  const s = qs.stringify(params)
+  const s = stringify(params)
   return s ? `?${s}` : ''
+}
+
+const toObject = (headers) => {
+  const headersObject = {}
+  for (const pair of headers.entries()) headersObject[pair[0]] = pair[1]
+  return headersObject
 }
 
 const _request = async (url, { method = 'GET', body = {}, params = {}, headers = {}, ...rest } = {}) => {
@@ -38,7 +43,7 @@ const request = async (url, { headers: hdrs = {}, ...rest } = {}, backoff) => {
   try {
     const response = await _request(url, { headers, ...rest })
     const { status, statusText, headers: responseHeaders, url: responseUrl } = response
-    const fields = { status, statusText, headers: responseHeaders, url: responseUrl }
+    const fields = { status, statusText, headers: toObject(responseHeaders), url: responseUrl }
 
     let content
     if (headers.Accept === 'application/json') {
@@ -57,7 +62,7 @@ const request = async (url, { headers: hdrs = {}, ...rest } = {}, backoff) => {
     if (backoff) {
       const { retries = 3, delay = 1000, multiplier = 2, onRetry } = backoff
       if (retries > 0) {
-        if (onRetry) onRetry({ exception }, { retries, delay, multiplier, onRetry })
+        if (onRetry) onRetry({ exception }, { retries, delay })
         await timeout(delay)
 
         const nextBackoff = { retries: retries - 1, delay: delay * multiplier, multiplier, onRetry }
@@ -69,4 +74,3 @@ const request = async (url, { headers: hdrs = {}, ...rest } = {}, backoff) => {
 }
 
 module.exports = request
-module.exports.toQs = toQs

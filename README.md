@@ -13,10 +13,6 @@ It works in the browser, on the server (Node.js), and mobile apps (like React Na
 `npm i request-dot-js` or `yarn add request-dot-js`.
 
 
-## Dependencies
-Peer deps are [__whatwg-fetch__](https://github.com/github/fetch) (not needed if you're targeting an environment that doesn't require the fetch polyfill) and [__qs__](https://github.com/ljharb/qs).
-
-
 ## Usage
 API: `async request(url[, options[, backoffOptions]])`
 
@@ -33,7 +29,7 @@ const { data, error, exception, ...rest } = await request(
   },
 )
 
-const { data, error, exception, ...rest } = await request(
+const { data, error, exception, headers, status, statusText, url } = await request(
   'https://httpbin.org/post',
   {
     method: 'POST', // default method is 'GET'
@@ -65,23 +61,59 @@ If __Content-Type__ is not overridden, `request` automatically stringifies `opti
 
 
 ### Exponential backoff
-API: `async requestBackoff(requester[, onResponse[, options]])`
-
 ~~~js
-import request, { requestBackoff } from 'request-dot-js'
+import request from 'request-dot-js'
 
-requestBackoff(
-  () => request('https://httpbin.org/get'),
-  ({ data, error, exception }, count) => { console.log(data, error, exception, count) },
-  { retries: 5, initialDelay: 500, multiplier: 2 },
+// retry request up to 4 times, with 1s, 2s, 4s, and 8s delays between retries
+const { data, error, exception, ...rest } = await request(
+  'https://httpbin.org/get',
+  { params: { a: 'b', c: 'd' } },
+  { retries: 4, delay: 1000 },
+)
+
+// callback style
+request('https://httpbin.org/get', {}, {}).then(response => {
+  const { data, error, exception, ...rest } = response
+  console.log(data, error, exception, rest)
+})
+
+// onRetry callback
+const { data, error, exception, ...rest } = await request(
+  'https://httpbin.org/get',
+  {},
+  {
+    onRetry: ({ exception }, backoffParams) => {
+      const { retries, delay } = backoffParams
+      console.log(retries, delay) // do something with remaining retries and current delay
+    },
+  },
 )
 ~~~
 
-`requestBackoff` invokes `requester`, which can be async. If `requester` returns an object that has a truthy value for the `exception` key, it backs off and retries the request.
+The third argument to `request` is an object literal with the following backoff options (listed here with their default values):
 
-Each time it invokes `requester`, it also passes the return value of `requester` to `onResponse`, and the number of times (`count`) that `requester` has been invoked.
+- `retries`, 3
+- `delay`, 1000ms
+- `multiplier`, 2
+- `onRetry`, undefined
 
-The return value of `request`, the default method in this package, combines nicely with the `requestBackoff` function, as you can see in the example above.
+If you invoke `request` with this third argument, even an empty object literal, __request.js__ will retry your request up to `retries` times and [back off exponentially](https://en.wikipedia.org/wiki/Exponential_backoff), as long as it's returning `exception`.
+
+If on any retry you regain connectivity and your request returns `data` or `error` instead of `exception`, the `request` method stops retrying your request and returns the usual `{ data, error, exception, ...rest }`.
+
+If you want to react to individual retries before `request` is done executing all of them, you can pass an `onRetry` callback, which receives `{ exception }, { retries, delay }`, with the number of remaining retries and the current delay in ms.
+
+
+## Dependencies
+For modern browsers, or React Native, __request.js__ has no dependencies.
+
+If you're targeting older browsers, like Internet Explorer, you need to polyfill [fetch](https://github.com/github/fetch) and `Promise`.
+
+If you use __request.js__ on the server, [node-fetch](https://github.com/bitinn/node-fetch) is a dependency.
+
+
+### Query stringification
+__request.js__ comes with a function that converts a query `params` object to a query string. If you want a fancier stringify function, feel free to use something like [qs](https://github.com/ljharb/qs) and write a wrapper around `request`.
 
 
 ## Development and tests
