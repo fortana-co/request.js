@@ -22,7 +22,7 @@ const toObject = headers => {
 
 const _request = async (
   url,
-  { method = 'GET', body = {}, params = {}, headers = {}, ...rest } = {}
+  { method = 'GET', body = {}, params = {}, headers = {}, ...rest } = {},
 ) => {
   const options = {
     method,
