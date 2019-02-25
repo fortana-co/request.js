@@ -66,12 +66,12 @@ test('request: exception', async t => {
 
 // backoff
 test.cb('backoff: retries on exception', t => {
-  t.plan(4)
+  t.plan(5)
 
   const onRetry = ({ exception }, { retries, delay }) => {
     t.truthy(exception)
     if (retries <= 1) {
-      t.is(delay, 500)
+      t.is(delay, 1000)
       t.end()
     }
   }
@@ -79,14 +79,14 @@ test.cb('backoff: retries on exception', t => {
 })
 
 test('backoff: eventually returns response', async t => {
-  const { exception } = await request('https://httpbin.smorg/get', {}, { delay: 250 })
+  const { exception } = await request('https://httpbin.smorg/get', {}, { delay: 250, retries: 3 })
   t.truthy(exception)
 })
 
 test.cb('backoff: callback style', t => {
   t.plan(1)
 
-  request('https://httpbin.smorg/get', {}, { delay: 250 }).then(({ exception }) => {
+  request('https://httpbin.smorg/get', {}, { delay: 250, retries: 3 }).then(({ exception }) => {
     t.truthy(exception)
     t.end()
   })

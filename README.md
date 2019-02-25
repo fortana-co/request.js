@@ -64,11 +64,11 @@ If __Accept__ is not overridden, `request` returns parsed JSON for __data/error_
 ~~~js
 import request from 'request-dot-js'
 
-// retry request up to 4 times, with 1s, 2s, 4s, and 8s delays between retries
+// retry request up to 5 times, with 1s, 2s, 4s, 8s and 16s delays between retries
 const { data, error, exception, ...rest } = await request(
   'https://httpbin.org/get',
   { params: { a: 'b', c: 'd' } },
-  { retries: 4, delay: 1000 },
+  { retries: 5, delay: 1000 },
 )
 
 // onRetry callback
@@ -86,8 +86,8 @@ const { data, error, exception, ...rest } = await request(
 
 `request` has a third argument, an object literal with __backoff options__ (listed here with their default values):
 
-- `retries`, 3
-- `delay`, 1000ms
+- `retries`, 4
+- `delay`, 2000ms
 - `multiplier`, 2
 - `onRetry`, undefined
 

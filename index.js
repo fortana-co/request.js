@@ -63,7 +63,7 @@ const request = async (url, { headers: hdrs = {}, ...rest } = {}, backoff) => {
     return { ...fields, data: content }
   } catch (exception) {
     if (backoff) {
-      const { retries = 3, delay = 1000, multiplier = 2, onRetry } = backoff
+      const { retries = 4, delay = 2000, multiplier = 2, onRetry } = backoff
       if (retries > 0) {
         if (onRetry) onRetry({ exception }, { retries, delay })
         await timeout(delay)
