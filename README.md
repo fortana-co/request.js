@@ -19,7 +19,7 @@ API: `async request(url[, options[, backoffOptions]])`
 ~~~js
 import request from 'request-dot-js'
 
-// in your async function...
+// in an async function...
 
 const { data, error, exception, ...rest } = await request(
   'https://httpbin.org/get',
@@ -51,13 +51,13 @@ If there is a connection error or timeout, it's `exception`.
 
 
 ### JSON by default
-__request.js__ is built for easy interaction with JSON APIs, the de facto standard for data serialization over HTTP.
+__request.js__ is built for easy interaction with JSON APIs, the de facto standard for data exchange on the web.
 
-`request` adds `'Content-Type': 'application/json', Accept: 'application/json'` to request headers by default.
+`request` adds `'Content-Type': 'application/json'` and `Accept: 'application/json'` request headers by default. You can override this by passing your own `Content-Type` and `Accept` headers.
 
-You can override this by passing your own `Content-Type` and `Accept` headers.
+If __Content-Type__ is not overridden, `request` automatically JSON stringifies `options.body`.
 
-If __Content-Type__ is not overridden, `request` automatically stringifies `options.body`. If __Accept__ is not overridden, `request` returns parsed JSON for __data/error__, else it returns a string.
+If __Accept__ is not overridden, `request` returns parsed JSON for __data/error__, else it returns the raw response string.
 
 
 ### Exponential backoff
@@ -70,12 +70,6 @@ const { data, error, exception, ...rest } = await request(
   { params: { a: 'b', c: 'd' } },
   { retries: 4, delay: 1000 },
 )
-
-// callback style
-request('https://httpbin.org/get', {}, {}).then(response => {
-  const { data, error, exception, ...rest } = response
-  console.log(data, error, exception, rest)
-})
 
 // onRetry callback
 const { data, error, exception, ...rest } = await request(
@@ -90,14 +84,14 @@ const { data, error, exception, ...rest } = await request(
 )
 ~~~
 
-The third argument to `request` is an object literal with the following backoff options (listed here with their default values):
+`request` has a third argument, an object literal with __backoff options__ (listed here with their default values):
 
 - `retries`, 3
 - `delay`, 1000ms
 - `multiplier`, 2
 - `onRetry`, undefined
 
-If you invoke `request` with this third argument, even an empty object literal, __request.js__ will retry your request up to `retries` times and [back off exponentially](https://en.wikipedia.org/wiki/Exponential_backoff), as long as it's returning `exception`.
+If you invoke `request` with this third argument, even an empty object literal, __request.js__ will retry your request up to `retries` times and [back off exponentially](https://en.wikipedia.org/wiki/Exponential_backoff) for as long as it's returning `exception`.
 
 If on any retry you regain connectivity and your request returns `data` or `error` instead of `exception`, the `request` method stops retrying your request and returns the usual `{ data, error, exception, ...rest }`.
 
@@ -107,9 +101,9 @@ If you want to react to individual retries before `request` is done executing al
 ## Dependencies
 For modern browsers, or React Native, __request.js__ has no dependencies.
 
-If you're targeting older browsers, like Internet Explorer, you need to polyfill [fetch](https://github.com/github/fetch) and `Promise`.
+If you're targeting older browsers, like Internet Explorer, you need to polyfill [fetch](https://github.com/github/fetch) and `Promise`, and use Babel to transpile your code.
 
-If you use __request.js__ on the server, [node-fetch](https://github.com/bitinn/node-fetch) is a dependency.
+If you use __request.js__ on the server, [node-fetch](https://github.com/bitinn/node-fetch) is the only dependency.
 
 
 ### Query stringification

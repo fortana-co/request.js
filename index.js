@@ -1,26 +1,29 @@
 const stringify = require('./stringify')
 
 let fetch
-const req = (module) => require(module)
+const req = module => require(module)
 if (typeof window === 'undefined') fetch = req('node-fetch')
 else fetch = window.fetch
 
-const timeout = (ms) => {
+const timeout = ms => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const toQs = (params) => {
+const toQs = params => {
   const s = stringify(params)
   return s ? `?${s}` : ''
 }
 
-const toObject = (headers) => {
+const toObject = headers => {
   const headersObject = {}
   for (const pair of headers.entries()) headersObject[pair[0]] = pair[1]
   return headersObject
 }
 
-const _request = async (url, { method = 'GET', body = {}, params = {}, headers = {}, ...rest } = {}) => {
+const _request = async (
+  url,
+  { method = 'GET', body = {}, params = {}, headers = {}, ...rest } = {}
+) => {
   const options = {
     method,
     body: headers['Content-Type'] === 'application/json' ? JSON.stringify(body) : body,
@@ -48,12 +51,12 @@ const request = async (url, { headers: hdrs = {}, ...rest } = {}, backoff) => {
     let content
     if (headers.Accept === 'application/json') {
       try {
-        content = await response.json() || {}
+        content = (await response.json()) || {}
       } catch (exception) {
         content = {}
       }
     } else {
-      content = await response.text() || '{}'
+      content = (await response.text()) || '{}'
     }
 
     if (status >= 300) return { ...fields, error: content }
