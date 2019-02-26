@@ -41,9 +41,8 @@ const _request = async (
  * `exception` keys, along with other response properties.
  */
 const request = async (url, { headers: hdrs = {}, retry, ...rest } = {}) => {
-  let data,
-    error,
-    exception,
+  let value,
+    type,
     fields = {}
   const headers = { 'Content-Type': 'application/json', Accept: 'application/json', ...hdrs }
 
@@ -52,24 +51,25 @@ const request = async (url, { headers: hdrs = {}, retry, ...rest } = {}) => {
     const { status, statusText, headers: responseHeaders, url: responseUrl } = response
     fields = { status, statusText, headers: toObject(responseHeaders), url: responseUrl }
 
-    let content
+    const text = await response.text()
     if (headers.Accept === 'application/json') {
       try {
-        content = (await response.json()) || {}
-      } catch (exception) {
-        content = {}
+        value = JSON.parse(text)
+      } catch (e) {
+        value = text
       }
     } else {
-      content = (await response.text()) || '{}'
+      value = text
     }
 
-    if (status >= 300) error = content
-    else data = content
+    if (status < 300) type = 'data'
+    else type = 'error'
   } catch (e) {
-    exception = e
+    value = e
+    type = 'exception'
   }
 
-  const response = { ...fields, data, error, exception }
+  const response = { ...fields, value, type }
   if (retry) {
     const {
       retries = 4,

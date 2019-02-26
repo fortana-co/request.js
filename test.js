@@ -2,44 +2,42 @@ import test from 'ava'
 import request from '.'
 
 test('request: redirect', async t => {
-  const { data, status } = await request('https://httpbin.org/redirect-to?url=get')
-  t.is(data.url, 'https://httpbin.org/get')
+  const { value, status } = await request('https://httpbin.org/redirect-to?url=get')
+  t.is(value.url, 'https://httpbin.org/get')
   t.is(status, 200)
-  t.pass()
 })
 
 test('request: redirect manual', async t => {
-  const { error, status } = await request('https://httpbin.org/redirect-to?url=get', { redirect: 'manual' })
-  t.deepEqual(error, {})
+  const { type, status } = await request('https://httpbin.org/redirect-to?url=get', { redirect: 'manual' })
+  t.is(type, 'error')
   t.is(status, 302)
 })
 
 test('request: default headers', async t => {
-  const { data, error, exception } = await request('https://httpbin.org/get')
-  t.is(data.url, 'https://httpbin.org/get')
-  t.is(data.headers['Content-Type'], 'application/json')
-  t.is(data.headers.Accept, 'application/json')
-  t.is(error, undefined)
-  t.is(exception, undefined)
+  const { value, type } = await request('https://httpbin.org/get')
+  t.is(value.url, 'https://httpbin.org/get')
+  t.is(value.headers['Content-Type'], 'application/json')
+  t.is(value.headers.Accept, 'application/json')
+  t.is(type, 'data')
 })
 
 test('request: querystring', async t => {
-  const { data } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd' } })
-  t.is(data.url, 'https://httpbin.org/get?a=b&c=d')
+  const { value } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd' } })
+  t.is(value.url, 'https://httpbin.org/get?a=b&c=d')
 })
 
 test('request: json body', async t => {
-  const { data } = await request('https://httpbin.org/post', { method: 'POST', body: { a: 'b', c: 'd' } })
-  t.deepEqual(data.json, { a: 'b', c: 'd' })
+  const { value } = await request('https://httpbin.org/post', { method: 'POST', body: { a: 'b', c: 'd' } })
+  t.deepEqual(value.json, { a: 'b', c: 'd' })
 })
 
 // client code must manually stringify request body and parse response JSON
 test('request: custom headers', async t => {
-  const { data } = await request(
+  const { value } = await request(
     'https://httpbin.org/post',
     { method: 'POST', headers: { 'Content-Type': '*', 'Accept': '*' }, body: JSON.stringify({ a: 'b', c: 'd' }) },
   )
-  const parsed = JSON.parse(data)
+  const parsed = JSON.parse(value)
   t.deepEqual(parsed.json, { a: 'b', c: 'd' })
 })
 
@@ -49,46 +47,43 @@ test('request: headers returned as object literal', async t => {
 })
 
 test('request: error', async t => {
-  const { data, error, exception, status } = await request('https://httpbin.org/GET')
+  const { type, status } = await request('https://httpbin.org/GET')
   t.is(status, 404)
-  t.deepEqual(error, {})
-  t.is(data, undefined)
-  t.is(exception, undefined)
+  t.is(type, 'error')
 })
 
 test('request: exception', async t => {
-  const { data, error, exception, ...rest } = await request('https://httpbin.smorg/get')
-  t.is(exception.code, 'ENOTFOUND')
+  const { value, type, ...rest } = await request('https://httpbin.smorg/get')
+  t.is(value.code, 'ENOTFOUND')
+  t.is(type, 'exception')
   t.deepEqual(rest, {})
-  t.is(data, undefined)
-  t.is(error, undefined)
 })
 
 // backoff
 test.cb('retry: retries on exception, increases delay', t => {
   t.plan(5)
 
-  const shouldRetry = ({ exception }, { retries, delay }) => {
-    t.truthy(exception)
+  const shouldRetry = ({ type }, { retries, delay }) => {
+    t.is(type, 'exception')
     if (retries <= 1) {
       t.is(delay, 1000)
       t.end()
     }
-    return exception !== undefined
+    return type === 'exception'
   }
   request('https://httpbin.smorg/get', { retry: { shouldRetry, delay: 125 } })
 })
 
 test('retry: eventually returns response', async t => {
-  const { exception } = await request('https://httpbin.smorg/get', { retry: { delay: 250, retries: 3 } })
-  t.truthy(exception)
+  const { type } = await request('https://httpbin.smorg/get', { retry: { delay: 250, retries: 3 } })
+  t.is(type, 'exception')
 })
 
 test.cb('retry: callback style', t => {
   t.plan(1)
 
-  request('https://httpbin.smorg/get', { retry: { delay: 250, retries: 3 } }).then(({ exception }) => {
-    t.truthy(exception)
+  request('https://httpbin.smorg/get', { retry: { delay: 250, retries: 3 } }).then(({ type }) => {
+    t.is(type, 'exception')
     t.end()
   })
 })
@@ -105,10 +100,10 @@ test.cb('retry: retries on custom condition', t => {
 })
 
 test('retry: no exception -> no retry', async t => {
-  const shouldRetry = ({ exception }, { retries }) => {
+  const shouldRetry = ({ type }, { retries }) => {
     t.pass()
     if (retries < 3) t.fail()
-    return exception !== undefined
+    return type === 'exception'
   }
   await request('https://httpbin.org/status/500', { retry: { shouldRetry, retries: 3, delay: 125 } })
 })
