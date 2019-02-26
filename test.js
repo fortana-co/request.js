@@ -65,17 +65,18 @@ test('request: exception', async t => {
 })
 
 // backoff
-test.cb('backoff: retries on exception', t => {
+test.cb('backoff: retries on exception, increases delay', t => {
   t.plan(5)
 
-  const onRetry = ({ exception }, { retries, delay }) => {
+  const shouldRetry = ({ exception }, { retries, delay }) => {
     t.truthy(exception)
     if (retries <= 1) {
       t.is(delay, 1000)
       t.end()
     }
+    return exception !== undefined
   }
-  request('https://httpbin.smorg/get', {}, { onRetry, delay: 125 })
+  request('https://httpbin.smorg/get', {}, { shouldRetry, delay: 125 })
 })
 
 test('backoff: eventually returns response', async t => {
@@ -90,4 +91,24 @@ test.cb('backoff: callback style', t => {
     t.truthy(exception)
     t.end()
   })
+})
+
+test.cb('backoff: retries on custom condition', t => {
+  t.plan(4)
+
+  const shouldRetry = ({ status }, { retries }) => {
+    t.pass()
+    if (retries <= 1) t.end()
+    return status === 500
+  }
+  request('https://httpbin.org/status/500', {}, { shouldRetry, delay: 125 })
+})
+
+test('backoff: no exception -> no retry', async t => {
+  const shouldRetry = ({ exception }, { retries }) => {
+    t.pass()
+    if (retries < 3) t.fail()
+    return exception !== undefined
+  }
+  await request('https://httpbin.org/status/500', {}, { shouldRetry, retries: 3, delay: 125 })
 })

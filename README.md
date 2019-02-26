@@ -38,16 +38,18 @@ const { data, error, exception, headers, status, statusText, url } = await reque
 )
 ~~~
 
-In the examples above, exactly one of `data`, `error` or `exception` will be truthy. If there is no connection error, and response status is less than 300, it's `data`, else it's `error`.
+In the examples above and all the ones that follow, only one of `data`, `error` or `exception` is defined.
 
-If there is a connection error or timeout, it's `exception`.
+If there is no connection error, and response status is less than 300, it's `data`, else it's `error`. If there is a connection error or timeout, it's `exception`.
 
-`rest` contains a few other attributes in the `Response` object returned by `fetch`:
+`rest` consists of a few other attributes in the `Response` object returned by `fetch`:
 
 - `headers`: object literal with headers, like axios
 - `status`: 200, 204, etc...
 - `statusText`: 'OK', 'CREATED', etc...
 - `url`: url after redirect(s)
+
+If there is an exception, these attributes are undefined.
 
 
 ### JSON by default
@@ -71,14 +73,14 @@ const { data, error, exception, ...rest } = await request(
   { retries: 5, delay: 1000 },
 )
 
-// onRetry callback
+// shouldRetry function
 const { data, error, exception, ...rest } = await request(
   'https://httpbin.org/get',
   {},
   {
-    onRetry: ({ exception }, backoffParams) => {
-      const { retries, delay } = backoffParams
+    shouldRetry: (response, { retries, delay }) => {
       console.log(retries, delay) // do something with remaining retries and current delay
+      return response.exception !== undefined || status === 500
     },
   },
 )
@@ -87,15 +89,17 @@ const { data, error, exception, ...rest } = await request(
 `request` has a third argument, an object literal with __backoff options__ (listed here with their default values):
 
 - `retries`, 4
-- `delay`, 2000ms
+- `delay`, 1000ms
 - `multiplier`, 2
-- `onRetry`, undefined
+- `shouldRetry`, `response => response.exception !== undefined`
 
 If you invoke `request` with this third argument, even an empty object literal, __request.js__ will retry your request up to `retries` times and [back off exponentially](https://en.wikipedia.org/wiki/Exponential_backoff) for as long as it's returning `exception`.
 
 If on any retry you regain connectivity and your request returns `data` or `error` instead of `exception`, the `request` method stops retrying your request and returns the usual `{ data, error, exception, ...rest }`.
 
-If you want to react to individual retries before `request` is done executing all of them, you can pass an `onRetry` callback, which receives `{ exception }, { retries, delay }`, with the number of remaining retries and the current delay in ms.
+If you want to set a custom condition for when to retry a request, pass your own `shouldRetry` function. It receives the usual response, `{ data, error, exception, ...rest }`, and the current backoff vaules, `{ retries, delay }`. If it returns a falsy value the `request` method stops retrying your request.
+
+The `shouldRetry` function also lets you react to individual retries before `request` is done executing all of them, if you want to do that. See the example above.
 
 
 ## Dependencies

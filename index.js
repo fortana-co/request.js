@@ -41,12 +41,16 @@ const _request = async (
  * `exception` keys, along with other response properties.
  */
 const request = async (url, { headers: hdrs = {}, ...rest } = {}, backoff) => {
+  let data,
+    error,
+    exception,
+    fields = {}
   const headers = { 'Content-Type': 'application/json', Accept: 'application/json', ...hdrs }
 
   try {
     const response = await _request(url, { headers, ...rest })
     const { status, statusText, headers: responseHeaders, url: responseUrl } = response
-    const fields = { status, statusText, headers: toObject(responseHeaders), url: responseUrl }
+    fields = { status, statusText, headers: toObject(responseHeaders), url: responseUrl }
 
     let content
     if (headers.Accept === 'application/json') {
@@ -59,21 +63,33 @@ const request = async (url, { headers: hdrs = {}, ...rest } = {}, backoff) => {
       content = (await response.text()) || '{}'
     }
 
-    if (status >= 300) return { ...fields, error: content }
-    return { ...fields, data: content }
-  } catch (exception) {
-    if (backoff) {
-      const { retries = 4, delay = 2000, multiplier = 2, onRetry } = backoff
-      if (retries > 0) {
-        if (onRetry) onRetry({ exception }, { retries, delay })
-        await timeout(delay)
-
-        const nextBackoff = { retries: retries - 1, delay: delay * multiplier, multiplier, onRetry }
-        return request(url, { headers, ...rest }, nextBackoff)
-      }
-    }
-    return { exception }
+    if (status >= 300) error = content
+    else data = content
+  } catch (e) {
+    exception = e
   }
+
+  const response = { ...fields, data, error, exception }
+  if (backoff) {
+    const {
+      retries = 4,
+      delay = 1000,
+      multiplier = 2,
+      shouldRetry = r => r.exception !== undefined,
+    } = backoff
+    if (retries > 0 && shouldRetry(response, { retries, delay })) {
+      await timeout(delay)
+
+      const nextBackoff = {
+        retries: retries - 1,
+        delay: delay * multiplier,
+        multiplier,
+        shouldRetry,
+      }
+      return request(url, { headers: hdrs, ...rest }, nextBackoff)
+    }
+  }
+  return response
 }
 
 module.exports = request
