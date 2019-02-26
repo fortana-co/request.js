@@ -40,7 +40,7 @@ const _request = async (
  * Returns object with truthy value for exactly one of `data`, `error`, and
  * `exception` keys, along with other response properties.
  */
-const request = async (url, { headers: hdrs = {}, ...rest } = {}, backoff) => {
+const request = async (url, { headers: hdrs = {}, retry, ...rest } = {}) => {
   let data,
     error,
     exception,
@@ -70,23 +70,23 @@ const request = async (url, { headers: hdrs = {}, ...rest } = {}, backoff) => {
   }
 
   const response = { ...fields, data, error, exception }
-  if (backoff) {
+  if (retry) {
     const {
       retries = 4,
       delay = 1000,
       multiplier = 2,
       shouldRetry = r => r.exception !== undefined,
-    } = backoff
+    } = retry
     if (retries > 0 && shouldRetry(response, { retries, delay })) {
       await timeout(delay)
 
-      const nextBackoff = {
+      const nextRetry = {
         retries: retries - 1,
         delay: delay * multiplier,
         multiplier,
         shouldRetry,
       }
-      return request(url, { headers: hdrs, ...rest }, nextBackoff)
+      return request(url, { headers: hdrs, retry: nextRetry, ...rest })
     }
   }
   return response

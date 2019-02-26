@@ -65,7 +65,7 @@ test('request: exception', async t => {
 })
 
 // backoff
-test.cb('backoff: retries on exception, increases delay', t => {
+test.cb('retry: retries on exception, increases delay', t => {
   t.plan(5)
 
   const shouldRetry = ({ exception }, { retries, delay }) => {
@@ -76,24 +76,24 @@ test.cb('backoff: retries on exception, increases delay', t => {
     }
     return exception !== undefined
   }
-  request('https://httpbin.smorg/get', {}, { shouldRetry, delay: 125 })
+  request('https://httpbin.smorg/get', { retry: { shouldRetry, delay: 125 } })
 })
 
-test('backoff: eventually returns response', async t => {
-  const { exception } = await request('https://httpbin.smorg/get', {}, { delay: 250, retries: 3 })
+test('retry: eventually returns response', async t => {
+  const { exception } = await request('https://httpbin.smorg/get', { retry: { delay: 250, retries: 3 } })
   t.truthy(exception)
 })
 
-test.cb('backoff: callback style', t => {
+test.cb('retry: callback style', t => {
   t.plan(1)
 
-  request('https://httpbin.smorg/get', {}, { delay: 250, retries: 3 }).then(({ exception }) => {
+  request('https://httpbin.smorg/get', { retry: { delay: 250, retries: 3 } }).then(({ exception }) => {
     t.truthy(exception)
     t.end()
   })
 })
 
-test.cb('backoff: retries on custom condition', t => {
+test.cb('retry: retries on custom condition', t => {
   t.plan(4)
 
   const shouldRetry = ({ status }, { retries }) => {
@@ -101,14 +101,14 @@ test.cb('backoff: retries on custom condition', t => {
     if (retries <= 1) t.end()
     return status === 500
   }
-  request('https://httpbin.org/status/500', {}, { shouldRetry, delay: 125 })
+  request('https://httpbin.org/status/500', { retry: { shouldRetry, delay: 125 } }, )
 })
 
-test('backoff: no exception -> no retry', async t => {
+test('retry: no exception -> no retry', async t => {
   const shouldRetry = ({ exception }, { retries }) => {
     t.pass()
     if (retries < 3) t.fail()
     return exception !== undefined
   }
-  await request('https://httpbin.org/status/500', {}, { shouldRetry, retries: 3, delay: 125 })
+  await request('https://httpbin.org/status/500', { retry: { shouldRetry, retries: 3, delay: 125 } })
 })

@@ -4,7 +4,7 @@
 [![NPM](https://img.shields.io/npm/v/request-dot-js.svg)](https://www.npmjs.com/package/request.js)
 [![npm bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/request-dot-js.svg)](https://www.npmjs.com/package/request.js)
 
-A ~1kB wrapper around `fetch`, with a convenient API for interacting with JSON APIs and support for exponential backoff.
+A ~1kB wrapper around `fetch`, with a convenient API for interacting with JSON APIs and support for retrying requests using exponential backoff.
 
 It works in the browser, on the server (Node.js), and mobile apps (like React Native).
 
@@ -14,7 +14,10 @@ It works in the browser, on the server (Node.js), and mobile apps (like React Na
 
 
 ## Usage
-API: `async request(url[, options[, backoffOptions]])`
+API: `async request(url[, options])`
+
+- `url`: a string
+- `options`: the fetch [__init__ object](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Syntax)
 
 ~~~js
 import request from 'request-dot-js'
@@ -38,9 +41,9 @@ const { data, error, exception, headers, status, statusText, url } = await reque
 )
 ~~~
 
-In the examples above and all the ones that follow, only one of `data`, `error` or `exception` is defined.
+For all responses returned by __request.js__, only one of `data`, `error` or `exception` is defined.
 
-If there is no connection error, and response status is less than 300, it's `data`, else it's `error`. If there is a connection error or timeout, it's `exception`.
+If there is no connection error, and response status is less than 300, it's `data`. If status is g.t.e. 300, it's `error`. If there is a connection error or timeout, it's `exception`.
 
 `rest` consists of a few other attributes in the `Response` object returned by `fetch`:
 
@@ -62,42 +65,42 @@ If __Content-Type__ is not overridden, `request` automatically JSON stringifies 
 If __Accept__ is not overridden, `request` returns parsed JSON for __data/error__, else it returns the raw response string.
 
 
-### Exponential backoff
+### Retry with exponential backoff
 ~~~js
 import request from 'request-dot-js'
 
 // retry request up to 5 times, with 1s, 2s, 4s, 8s and 16s delays between retries
 const { data, error, exception, ...rest } = await request(
   'https://httpbin.org/get',
-  { params: { a: 'b', c: 'd' } },
-  { retries: 5, delay: 1000 },
+  { params: { a: 'b', c: 'd' }, retry: { retries: 5, delay: 1000 } },
 )
 
 // shouldRetry function
 const { data, error, exception, ...rest } = await request(
   'https://httpbin.org/get',
-  {},
   {
-    shouldRetry: (response, { retries, delay }) => {
-      console.log(retries, delay) // do something with remaining retries and current delay
-      return response.exception !== undefined || status === 500
+    retry: {
+      shouldRetry: (response, { retries, delay }) => {
+        console.log(retries, delay) // do something with current retries and delay if you want
+        return response.exception || status === 500
+      },
     },
   },
 )
 ~~~
 
-`request` has a third argument, an object literal with __backoff options__ (listed here with their default values):
+`request`s second argument has a special `retry` key that can point to an object with __retry options__ (listed here with their default values):
 
 - `retries`, 4
 - `delay`, 1000ms
 - `multiplier`, 2
 - `shouldRetry`, `response => response.exception !== undefined`
 
-If you invoke `request` with this third argument, even an empty object literal, __request.js__ will retry your request up to `retries` times and [back off exponentially](https://en.wikipedia.org/wiki/Exponential_backoff) for as long as it's returning `exception`.
+If you pass a `retry` object, even an empty one, and your request throws an exception, __request.js__ retries it up to `retries` times and [backs off exponentially](https://en.wikipedia.org/wiki/Exponential_backoff).
 
 If on any retry you regain connectivity and your request returns `data` or `error` instead of `exception`, the `request` method stops retrying your request and returns the usual `{ data, error, exception, ...rest }`.
 
-If you want to set a custom condition for when to retry a request, pass your own `shouldRetry` function. It receives the usual response, `{ data, error, exception, ...rest }`, and the current backoff vaules, `{ retries, delay }`. If it returns a falsy value the `request` method stops retrying your request.
+If you want to set a custom condition for when to retry a request, pass your own `shouldRetry` function. It receives the usual response, `{ data, error, exception, ...rest }`, and the current backoff vaules, `{ retries, delay }`. If it returns a falsy value __request.js__ stops retrying your request.
 
 The `shouldRetry` function also lets you react to individual retries before `request` is done executing all of them, if you want to do that. See the example above.
 
