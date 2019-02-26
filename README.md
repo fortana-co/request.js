@@ -24,7 +24,7 @@ import request from 'request-dot-js'
 
 // in an async function...
 
-const { value, type, headers, status, statusText, url } = await request(
+const { data, type, headers, status, statusText, url } = await request(
   'https://httpbin.org/get',
   {
     headers: { 'Custom-Header': 'abcd' },
@@ -32,18 +32,18 @@ const { value, type, headers, status, statusText, url } = await request(
   },
 )
 
-if (type === 'data') handleData(value) // do something with data
+if (type === 'success') handleSuccess(data) // do something with success
 
-if (type === 'error') handleError(value) // do something with error
+if (type === 'err') handleError(data) // do something with error
 
-if (type === 'exception') handleException(value) // do something with exception
+if (type === 'exc') handleException(data) // do something with exception
 ~~~
 
-For all responses returned by __request.js__, `type` is either `'data'`, `'error'` or `'exception'`.
+For all responses returned by __request.js__, `type` is either `'success'`, `'error'` or `'exception'`.
 
-If there's no connection error, `value` is read from the response stream. If `status < 300` type is `'data'`. If `status >= 300`, type is `'error'`.
+If there's no connection error, `data` is read from the response stream. If `status < 300` type is `'success'`. If `status >= 300`, type is `'error'`.
 
-If there's a connection error or timeout, type is `'exception'`, and `value` is the exception thrown by fetch.
+If there's a connection error or timeout, type is `'exception'`, and `data` is the exception thrown by fetch.
 
 The other attributes come from the `Response` object returned by fetch:
 
@@ -56,14 +56,14 @@ If type is `'exception'`, these attributes are undefined.
 
 
 ### JSON by default
-__request.js__ is built for easy interaction with JSON APIs, the de facto standard for data exchange on the web.
+__request.js__ is built for easy interaction with JSON APIs, the de facto standard for success exchange on the web.
 
 `request` adds `'Content-Type': 'application/json'` and `Accept: 'application/json'` request headers by default. You can override this by passing your own `Content-Type` and `Accept` headers.
 
 If __Content-Type__ is not overridden, `request` automatically JSON stringifies `options.body`.
 
 ~~~js
-const { value, type, ...rest } = await request(
+const { data, type, ...rest } = await request(
   'https://httpbin.org/post',
   {
     method: 'POST', // default method is 'GET'
@@ -72,11 +72,11 @@ const { value, type, ...rest } = await request(
 )
 ~~~
 
-If __Accept__ is not overridden, `request` tries to return parsed JSON for `value`, else it returns the raw response string.
+If __Accept__ is not overridden, `request` tries to return parsed JSON for `data`, else it returns the raw response string.
 
 ~~~js
-const { value } = await request('https://httpbin.org/get')
-console.log(value.url)
+const { data } = await request('https://httpbin.org/get')
+console.log(data.url)
 ~~~
 
 
@@ -85,13 +85,13 @@ console.log(value.url)
 import request from 'request-dot-js'
 
 // retry request up to 5 times, with 1s, 2s, 4s, 8s and 16s delays between retries
-const { value, type, ...rest } = await request(
+const { data, type, ...rest } = await request(
   'https://httpbin.org/get',
   { params: { a: 'b', c: 'd' }, retry: { retries: 5, delay: 1000 } },
 )
 
 // shouldRetry function
-const { value, type, ...rest } = await request(
+const { data, type, ...rest } = await request(
   'https://httpbin.org/get',
   {
     retry: {
@@ -113,9 +113,9 @@ const { value, type, ...rest } = await request(
 
 If you pass a `retry` object, even an empty one, and your request throws an exception, __request.js__ retries it up to `retries` times and [backs off exponentially](https://en.wikipedia.org/wiki/Exponential_backoff).
 
-If on any retry you regain connectivity and type is `'data'` or `'error'` instead of `'exception'`, the `request` method stops retrying your request and returns the usual `{ value, type, ...rest }`.
+If on any retry you regain connectivity and type is `'success'` or `'error'` instead of `'exception'`, the `request` method stops retrying your request and returns the usual `{ data, type, ...rest }`.
 
-If you want to set a custom condition for when to retry a request, pass your own `shouldRetry` function. It receives the usual response, `{ value, type, ...rest }`, and the current backoff vaules, `{ retries, delay }`. If it returns a falsy value __request.js__ stops retrying your request.
+If you want to set a custom condition for when to retry a request, pass your own `shouldRetry` function. It receives the usual response, `{ data, type, ...rest }`, and the current backoff vaules, `{ retries, delay }`. If it returns a falsy value __request.js__ stops retrying your request.
 
 The `shouldRetry` function also lets you react to individual retries before `request` is done executing all of them, if you want to do that. See the example above.
 

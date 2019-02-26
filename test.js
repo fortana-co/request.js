@@ -2,8 +2,8 @@ import test from 'ava'
 import request from '.'
 
 test('request: redirect', async t => {
-  const { value, status } = await request('https://httpbin.org/redirect-to?url=get')
-  t.is(value.url, 'https://httpbin.org/get')
+  const { data, status } = await request('https://httpbin.org/redirect-to?url=get')
+  t.is(data.url, 'https://httpbin.org/get')
   t.is(status, 200)
 })
 
@@ -14,30 +14,30 @@ test('request: redirect manual', async t => {
 })
 
 test('request: default headers', async t => {
-  const { value, type } = await request('https://httpbin.org/get')
-  t.is(value.url, 'https://httpbin.org/get')
-  t.is(value.headers['Content-Type'], 'application/json')
-  t.is(value.headers.Accept, 'application/json')
-  t.is(type, 'data')
+  const { data, type } = await request('https://httpbin.org/get')
+  t.is(data.url, 'https://httpbin.org/get')
+  t.is(data.headers['Content-Type'], 'application/json')
+  t.is(data.headers.Accept, 'application/json')
+  t.is(type, 'success')
 })
 
 test('request: querystring', async t => {
-  const { value } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd' } })
-  t.is(value.url, 'https://httpbin.org/get?a=b&c=d')
+  const { data } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd' } })
+  t.is(data.url, 'https://httpbin.org/get?a=b&c=d')
 })
 
 test('request: json body', async t => {
-  const { value } = await request('https://httpbin.org/post', { method: 'POST', body: { a: 'b', c: 'd' } })
-  t.deepEqual(value.json, { a: 'b', c: 'd' })
+  const { data } = await request('https://httpbin.org/post', { method: 'POST', body: { a: 'b', c: 'd' } })
+  t.deepEqual(data.json, { a: 'b', c: 'd' })
 })
 
 // client code must manually stringify request body and parse response JSON
 test('request: custom headers', async t => {
-  const { value } = await request(
+  const { data } = await request(
     'https://httpbin.org/post',
     { method: 'POST', headers: { 'Content-Type': '*', 'Accept': '*' }, body: JSON.stringify({ a: 'b', c: 'd' }) },
   )
-  const parsed = JSON.parse(value)
+  const parsed = JSON.parse(data)
   t.deepEqual(parsed.json, { a: 'b', c: 'd' })
 })
 
@@ -53,8 +53,8 @@ test('request: error', async t => {
 })
 
 test('request: exception', async t => {
-  const { value, type, ...rest } = await request('https://httpbin.smorg/get')
-  t.is(value.code, 'ENOTFOUND')
+  const { data, type, ...rest } = await request('https://httpbin.smorg/get')
+  t.is(data.code, 'ENOTFOUND')
   t.is(type, 'exception')
   t.deepEqual(rest, {})
 })

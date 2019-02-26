@@ -37,11 +37,11 @@ const _request = async (
 }
 
 /**
- * Returns object with truthy value for exactly one of `data`, `error`, and
- * `exception` keys, along with other response properties.
+ * Returns response object with `data`, `type` (one of 'success', 'error', 'exception'),
+ * along with other response properties.
  */
 const request = async (url, { headers: hdrs = {}, retry, ...rest } = {}) => {
-  let value,
+  let data,
     type,
     fields = {}
   const headers = { 'Content-Type': 'application/json', Accept: 'application/json', ...hdrs }
@@ -54,22 +54,22 @@ const request = async (url, { headers: hdrs = {}, retry, ...rest } = {}) => {
     const text = await response.text()
     if (headers.Accept === 'application/json') {
       try {
-        value = JSON.parse(text)
+        data = JSON.parse(text)
       } catch (e) {
-        value = text
+        data = text
       }
     } else {
-      value = text
+      data = text
     }
 
-    if (status < 300) type = 'data'
+    if (status < 300) type = 'success'
     else type = 'error'
   } catch (e) {
-    value = e
+    data = e
     type = 'exception'
   }
 
-  const response = { ...fields, value, type }
+  const response = { ...fields, data, type }
   if (retry) {
     const {
       retries = 4,
