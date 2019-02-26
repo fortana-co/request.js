@@ -34,9 +34,9 @@ const { data, type, headers, status, statusText, url } = await request(
 
 if (type === 'success') handleSuccess(data) // do something with success
 
-if (type === 'err') handleError(data) // do something with error
+if (type === 'error') handleError(data) // do something with error
 
-if (type === 'exc') handleException(data) // do something with exception
+if (type === 'exception') handleException(data) // do something with exception
 ~~~
 
 For all responses returned by __request.js__, `type` is either `'success'`, `'error'` or `'exception'`.
