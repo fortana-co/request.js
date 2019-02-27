@@ -1,24 +1,15 @@
 import test from 'ava'
 import request from '.'
 
-test('request: redirect', async t => {
-  const { data, status } = await request('https://httpbin.org/redirect-to?url=get')
-  t.is(data.url, 'https://httpbin.org/get')
-  t.is(status, 200)
-})
-
-test('request: redirect manual', async t => {
-  const { type, status } = await request('https://httpbin.org/redirect-to?url=get', { redirect: 'manual' })
-  t.is(type, 'error')
-  t.is(status, 302)
-})
-
-test('request: default headers', async t => {
-  const { data, type } = await request('https://httpbin.org/get')
+test('request: default request headers', async t => {
+  const { data, type, status, statusText, url } = await request('https://httpbin.org/get')
   t.is(data.url, 'https://httpbin.org/get')
   t.is(data.headers['Content-Type'], 'application/json')
   t.is(data.headers.Accept, 'application/json')
   t.is(type, 'success')
+  t.is(status, 200)
+  t.is(statusText, 'OK')
+  t.is(url, 'https://httpbin.org/get')
 })
 
 test('request: querystring', async t => {
@@ -31,8 +22,20 @@ test('request: json body', async t => {
   t.deepEqual(data.json, { a: 'b', c: 'd' })
 })
 
+test('request: redirect', async t => {
+  const { data, status } = await request('https://httpbin.org/redirect-to?url=get')
+  t.is(data.url, 'https://httpbin.org/get')
+  t.is(status, 200)
+})
+
+test('request: redirect manual', async t => {
+  const { type, status } = await request('https://httpbin.org/redirect-to?url=get', { redirect: 'manual' })
+  t.is(type, 'error')
+  t.is(status, 302)
+})
+
 // client code must manually stringify request body and parse response JSON
-test('request: custom headers', async t => {
+test('request: custom request headers', async t => {
   const { data } = await request(
     'https://httpbin.org/post',
     { method: 'POST', headers: { 'Content-Type': '*', 'Accept': '*' }, body: JSON.stringify({ a: 'b', c: 'd' }) },
@@ -41,7 +44,7 @@ test('request: custom headers', async t => {
   t.deepEqual(parsed.json, { a: 'b', c: 'd' })
 })
 
-test('request: headers returned as object literal', async t => {
+test('request: response headers are object literal', async t => {
   const { headers } = await request('https://httpbin.org/get')
   t.is(headers['content-encoding'], 'gzip')
 })
