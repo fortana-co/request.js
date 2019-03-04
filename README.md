@@ -47,7 +47,7 @@ If there's a connection error or timeout, type is `'exception'`, and `data` is t
 
 The other attributes come from the `Response` object returned by fetch:
 
-- `headers`: object literal with headers, like axios
+- `headers`: object literal with headers; all header names lowercased, like axios
 - `status`: 200, 204, etc...
 - `statusText`: 'OK', 'CREATED', etc...
 - `url`: url after redirect(s)
@@ -58,9 +58,9 @@ If type is `'exception'`, these attributes are undefined.
 ### JSON by default
 __request.js__ is built for easy interaction with JSON APIs, the de facto standard for success exchange on the web.
 
-`request` adds `'Content-Type': 'application/json'` and `Accept: 'application/json'` request headers by default. You can override this by passing your own `Content-Type` and `Accept` headers.
+`request` adds `'content-type': 'application/json'` and `accept: 'application/json'` request headers by default. You can override this by passing your own `content-type` and `accept` headers. As with fetch and axios, header names are case insensitive.
 
-If __Content-Type__ is not overridden, `request` automatically JSON stringifies `options.body`.
+If __content-type__ is not overridden, `request` automatically JSON stringifies `options.body`.
 
 ~~~js
 const { data, type, ...rest } = await request(
@@ -72,7 +72,7 @@ const { data, type, ...rest } = await request(
 )
 ~~~
 
-If __Accept__ is not overridden, `request` tries to return parsed JSON for `data`, else it returns the raw response string.
+If __accept__ is not overridden, `request` tries to return parsed JSON for `data`, else it returns the raw response string.
 
 ~~~js
 const { data } = await request('https://httpbin.org/get')

@@ -20,18 +20,24 @@ const toObject = headers => {
   return headersObject
 }
 
+const lowercased = object => {
+  const obj = {}
+  for (const key of Object.keys(object)) obj[key.toLowerCase()] = object[key]
+  return obj
+}
+
 const _request = async (
   url,
   { method = 'GET', body = {}, params = {}, headers = {}, ...rest } = {},
 ) => {
   const options = {
     method,
-    body: headers['Content-Type'] === 'application/json' ? JSON.stringify(body) : body,
+    body: headers['content-type'] === 'application/json' ? JSON.stringify(body) : body,
     headers,
     ...rest,
   }
 
-  if (['GET', 'HEAD'].indexOf(method) > -1) delete options.body
+  if (['GET', 'HEAD'].indexOf(method.toUpperCase()) > -1) delete options.body
 
   return fetch(`${url}${toQs(params)}`, options)
 }
@@ -40,19 +46,23 @@ const _request = async (
  * Returns response object with `data`, `type` (one of 'success', 'error', 'exception'),
  * along with other response properties.
  */
-const request = async (url, { headers: hdrs = {}, retry, ...rest } = {}) => {
+const request = async (url, { headers, retry, ...rest } = {}) => {
   let data,
     type,
     fields = {}
-  const headers = { 'Content-Type': 'application/json', Accept: 'application/json', ...hdrs }
+  const requestHeaders = {
+    'content-type': 'application/json',
+    accept: 'application/json',
+    ...lowercased(headers || {}),
+  }
 
   try {
-    const response = await _request(url, { headers, ...rest })
+    const response = await _request(url, { headers: requestHeaders, ...rest })
     const { status, statusText, headers: responseHeaders, url: responseUrl } = response
     fields = { status, statusText, headers: toObject(responseHeaders), url: responseUrl }
 
     const text = await response.text()
-    if (headers.Accept === 'application/json') {
+    if (requestHeaders.accept === 'application/json') {
       try {
         data = JSON.parse(text)
       } catch (e) {
@@ -86,7 +96,7 @@ const request = async (url, { headers: hdrs = {}, retry, ...rest } = {}) => {
         multiplier,
         shouldRetry,
       }
-      return request(url, { headers: hdrs, retry: nextRetry, ...rest })
+      return request(url, { headers, retry: nextRetry, ...rest })
     }
   }
   return response

@@ -35,10 +35,10 @@ test('request: redirect manual', async t => {
 })
 
 // client code must manually stringify request body and parse response JSON
-test('request: custom request headers', async t => {
+test('request: custom request headers, case insensitive', async t => {
   const { data } = await request(
     'https://httpbin.org/post',
-    { method: 'POST', headers: { 'Content-Type': '*', 'Accept': '*' }, body: JSON.stringify({ a: 'b', c: 'd' }) },
+    { method: 'POST', headers: { 'CONTENT-TYPE': '*', 'accept': '*' }, body: JSON.stringify({ a: 'b', c: 'd' }) },
   )
   const parsed = JSON.parse(data)
   t.deepEqual(parsed.json, { a: 'b', c: 'd' })
