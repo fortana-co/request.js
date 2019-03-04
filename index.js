@@ -102,4 +102,13 @@ const request = async (url, { headers, retry, ...rest } = {}) => {
   return response
 }
 
+const requester = method => (url, options = {}) => request(url, { ...options, method })
+
 module.exports = request
+module.exports.delete = requester('DELETE')
+module.exports.get = requester('GET')
+module.exports.head = requester('HEAD')
+module.exports.options = requester('OPTIONS')
+module.exports.patch = requester('PATCH')
+module.exports.post = requester('POST')
+module.exports.put = requester('PUT')

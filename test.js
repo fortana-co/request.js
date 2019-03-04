@@ -62,6 +62,15 @@ test('request: exception', async t => {
   t.deepEqual(rest, {})
 })
 
+test('request: convenience methods', async t => {
+  let { type } = await request.post('https://httpbin.org/post')
+  t.is(type, 'success')
+  ;({ type } = await request.put('https://httpbin.org/put'))
+  t.is(type, 'success')
+  ;({ type } = await request.get('https://httpbin.org/post'))
+  t.is(type, 'error')
+})
+
 // backoff
 test.cb('retry: retries on exception, increases delay', t => {
   t.plan(5)

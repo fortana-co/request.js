@@ -120,6 +120,20 @@ If you want to set a custom condition for when to retry a request, pass your own
 The `shouldRetry` function also lets you react to individual retries before `request` is done executing all of them, if you want to do that. See the example above.
 
 
+## HTTP Convenience Methods
+__request.js__ has convenience methods for the following HTTP methods: `delete`, `get`, `head`, `options`, `patch`, `post`, and `put`.
+
+~~~js
+import request from 'request-dot-js'
+
+const { data, type } = await request.post('https://httpbin.org/post', { body: { a: 'b' } })
+
+const { data, type } = await request.put('https://httpbin.org/put', { body: { a: 'b' } })
+~~~
+
+These allow you to send non-GET requests without passing the `method` key in the second argument.
+
+
 ## Dependencies
 For modern browsers, or React Native, __request.js__ has no dependencies.
 
