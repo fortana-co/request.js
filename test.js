@@ -17,6 +17,11 @@ test('request: querystring', async t => {
   t.is(data.url, 'https://httpbin.org/get?a=b&c=d')
 })
 
+test('request: custom stringify', async t => {
+  const { data } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd' }, stringify: () => 'a=b' })
+  t.is(data.url, 'https://httpbin.org/get?a=b')
+})
+
 test('request: json body', async t => {
   const { data } = await request('https://httpbin.org/post', { method: 'POST', body: { a: 'b', c: 'd' } })
   t.deepEqual(data.json, { a: 'b', c: 'd' })
@@ -63,12 +68,13 @@ test('request: exception', async t => {
 })
 
 test('request: convenience methods', async t => {
-  let { type } = await request.post('https://httpbin.org/post')
-  t.is(type, 'success')
-  ;({ type } = await request.put('https://httpbin.org/put'))
-  t.is(type, 'success')
-  ;({ type } = await request.get('https://httpbin.org/post'))
-  t.is(type, 'error')
+  let response = await request.post('https://httpbin.org/post', { body: { a: 'b' } })
+  t.is(response.type, 'success')
+  t.is(response.data.json.a, 'b')
+  response = await request.delete('https://httpbin.org/delete')
+  t.is(response.type, 'success')
+  response = await request.get('https://httpbin.org/post')
+  t.is(response.type, 'error')
 })
 
 // backoff

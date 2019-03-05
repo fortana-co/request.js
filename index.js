@@ -1,4 +1,4 @@
-const stringify = require('./stringify')
+const defaultStringify = require('./stringify')
 
 let fetch
 const req = module => require(module)
@@ -9,7 +9,7 @@ const timeout = ms => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const toQs = params => {
+const toQs = (params, stringify = defaultStringify) => {
   const s = stringify(params)
   return s ? `?${s}` : ''
 }
@@ -28,7 +28,7 @@ const lowercased = object => {
 
 const _request = async (
   url,
-  { method = 'GET', body = {}, params = {}, headers = {}, ...rest } = {},
+  { method = 'GET', body = {}, params = {}, headers = {}, stringify, ...rest } = {},
 ) => {
   const options = {
     method,
@@ -39,7 +39,7 @@ const _request = async (
 
   if (['GET', 'HEAD'].indexOf(method.toUpperCase()) > -1) delete options.body
 
-  return fetch(`${url}${toQs(params)}`, options)
+  return fetch(`${url}${toQs(params, stringify)}`, options)
 }
 
 /**

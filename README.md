@@ -32,31 +32,31 @@ const { data, type, headers, status, statusText, url } = await request(
   },
 )
 
-if (type === 'success') handleSuccess(data) // do something with success
+if (type === 'success') handleSuccess(data)
 
-if (type === 'error') handleError(data) // do something with error
+if (type === 'error') handleError(data)
 
-if (type === 'exception') handleException(data) // do something with exception
+if (type === 'exception') handleException(data)
 ~~~
 
 For all responses returned by __request.js__, `type` is either `'success'`, `'error'` or `'exception'`.
 
-If there's no connection error, `data` is read from the response stream. If `status < 300` type is `'success'`. If `status >= 300`, type is `'error'`.
+If no exception is thrown, `data` is read from the response stream. If `status < 300` type is `'success'`. If `status >= 300`, type is `'error'`.
 
-If there's a connection error or timeout, type is `'exception'`, and `data` is the exception thrown by fetch.
+If there's a connection error, timeout, or other exception, type is `'exception'`, and `data` is the exception thrown by fetch.
 
 The other attributes come from the `Response` object returned by fetch:
 
-- `headers`: object literal with headers; all header names lowercased, like axios
 - `status`: 200, 204, etc...
 - `statusText`: 'OK', 'CREATED', etc...
 - `url`: url after redirect(s)
+- `headers`: object literal instead of `Headers` instance; header names are lowercased
 
 If type is `'exception'`, these attributes are undefined.
 
 
 ### JSON by default
-__request.js__ is built for easy interaction with JSON APIs, the de facto standard for success exchange on the web.
+__request.js__ is built for easy interaction with JSON APIs, the de facto standard for data exchange on the web.
 
 `request` adds `'content-type': 'application/json'` and `accept: 'application/json'` request headers by default. You can override this by passing your own `content-type` and `accept` headers. As with fetch and axios, header names are case insensitive.
 
@@ -104,7 +104,7 @@ const { data, type, ...rest } = await request(
 )
 ~~~
 
-`request`s second argument has a special `retry` key that can point to an object with __retry options__ (listed here with their default values):
+`request`s `options` argument has a special `retry` key that can point to an object with __retry options__ (listed here with their default values):
 
 - `retries`, 4
 - `delay`, 1000ms
@@ -120,18 +120,47 @@ If you want to set a custom condition for when to retry a request, pass your own
 The `shouldRetry` function also lets you react to individual retries before `request` is done executing all of them, if you want to do that. See the example above.
 
 
-## HTTP Convenience Methods
-__request.js__ has convenience methods for the following HTTP methods: `delete`, `get`, `head`, `options`, `patch`, `post`, and `put`.
+## Convenience Methods
+__request.js__ has convenience methods for the following HTTP methods: `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, and `PUT`.
 
 ~~~js
 import request from 'request-dot-js'
 
-const { data, type } = await request.post('https://httpbin.org/post', { body: { a: 'b' } })
+const { data, type } = await request.delete('https://httpbin.org/delete')
 
 const { data, type } = await request.put('https://httpbin.org/put', { body: { a: 'b' } })
 ~~~
 
-These allow you to send non-GET requests without passing the `method` key in the second argument.
+These allow you to send non-GET requests without passing the `method` key in the `options` argument.
+
+
+### Query stringification
+__request.js__ comes with a function that converts a query `params` object to a query string. If you want a fancier `stringify` function, like the one in [qs](https://github.com/ljharb/qs), you can pass your own in the `options` argument.
+
+~~~js
+import qs from 'qs'
+
+const { data, type } = await request(
+  'https://httpbin.org/get',
+  { params: { a: 'b' }, stringify: qs.stringify },
+)
+~~~
+
+
+### Request Cancellation
+Little known fact, but this is actually [easy to do with fetch](https://developer.mozilla.org/en-US/docs/Web/API/AbortController), it's just not supported on older browsers.
+
+
+## Why request.js?
+Why not axios, or just fetch? Unlike fetch, __request.js__ is very convenient to use:
+
+- JSON first
+- simple query params and response headers
+- no double `await` to read data
+
+And unlike either of them, it doesn't require `try / catch` to handle exceptions. `const { data, type } = await request(...)` has all the info you need to handle successful requests, request errors, and connection errors. 
+
+This design gives __request.js__ flexible, built-in support for retries with exponential backoff.
 
 
 ## Dependencies
@@ -140,10 +169,6 @@ For modern browsers, or React Native, __request.js__ has no dependencies.
 If you're targeting older browsers, like Internet Explorer, you need to polyfill [fetch](https://github.com/github/fetch) and `Promise`, and use Babel to transpile your code.
 
 If you use __request.js__ on the server, [node-fetch](https://github.com/bitinn/node-fetch) is the only dependency.
-
-
-### Query stringification
-__request.js__ comes with a function that converts a query `params` object to a query string. If you want a fancier stringify function, feel free to use something like [qs](https://github.com/ljharb/qs) and write a wrapper around `request`.
 
 
 ## Development and tests
