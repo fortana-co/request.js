@@ -104,7 +104,7 @@ const { data, type, ...rest } = await request(
 )
 ~~~
 
-`request`s `options` argument has a special `retry` key that can point to an object with __retry options__ (listed here with their default values):
+`request`'s `options` argument has a special `retry` key that can point to an object with __retry options__ (listed here with their default values):
 
 - `retries`, 4
 - `delay`, 1000ms
