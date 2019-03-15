@@ -13,7 +13,7 @@ test('request: default request headers', async t => {
 })
 
 test('request: querystring', async t => {
-  const { data } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd' } })
+  const { data } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd', e: undefined } })
   t.is(data.url, 'https://httpbin.org/get?a=b&c=d')
 })
 

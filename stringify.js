@@ -24,6 +24,7 @@ module.exports = function(obj) {
   return Object.keys(obj)
     .map(function(k) {
       const ks = encodeURIComponent(stringifyPrimitive(k)) + eq
+
       if (Array.isArray(obj[k])) {
         return obj[k]
           .map(function(v) {
@@ -31,6 +32,7 @@ module.exports = function(obj) {
           })
           .join(sep)
       } else {
+        if (obj[k] === undefined) return ''
         return ks + encodeURIComponent(stringifyPrimitive(obj[k]))
       }
     })
