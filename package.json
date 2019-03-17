@@ -27,7 +27,8 @@
   "scripts": {
     "test": "eslint index.js stringify.js && prettier --check index.js stringify.js && ava -v",
     "prettier-check": "prettier --check index.js stringify.js",
-    "prettier": "prettier --write index.js stringify.js"
+    "prettier": "prettier --write index.js stringify.js",
+    "postinstall": "rm -f .git/hooks/applypatch-msg & rm -f .git/hooks/commit-msg & rm -f .git/hooks/prepare-commit-msg"
   },
   "dependencies": {},
   "husky": {
