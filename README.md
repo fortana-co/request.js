@@ -151,6 +151,40 @@ const { data, type } = await request(
 Little known fact, but this is actually [easy to do with fetch](https://developer.mozilla.org/en-US/docs/Web/API/AbortController), it's just not supported on older browsers.
 
 
+## TypeScript
+__request.js__ ships with [TypeScript declarations](https://github.com/fortana-co/request.js/blob/master/index.d.ts) and works great with TypeScript, with a few caveats.
+
+First, make sure you enable `esModuleInterop` if you're using TypeScript to compile your application. This option is enabled by default if you run `tsc --init`.
+
+Regarding convenience methods, you can't do this:
+
+~~~ts
+import request from 'request-dot-js'
+
+request.put(...)
+~~~
+
+Do this instead:
+
+~~~ts
+import { put } from 'request-dot-js'
+
+put(...)
+~~~
+
+Also, you can't do this, because `delete` is a restricted keyword:
+
+~~~ts
+import { delete as del } from 'request-dot-js'
+~~~
+
+Do this instead:
+
+~~~ts
+import { del } from 'request-dot-js'
+~~~
+
+
 ## Why request.js?
 Why not axios, or just fetch? Unlike fetch, __request.js__ is very convenient to use:
 

@@ -4,6 +4,7 @@
   "author": "Kyle Bebak <kylebebak@gmail.com>",
   "description": "A ~1kB wrapper around fetch, with a convenient API for interacting with JSON APIs and support for exponential backoff",
   "main": "./index.js",
+  "types": "./index.d.ts",
   "keywords": [
     "fetch",
     "request",

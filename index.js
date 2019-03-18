@@ -105,6 +105,7 @@ const request = async (url, { headers, retry, ...rest } = {}) => {
 const requester = method => (url, options = {}) => request(url, { ...options, method })
 
 module.exports = request
+module.exports.del = requester('DELETE')
 module.exports.delete = requester('DELETE')
 module.exports.get = requester('GET')
 module.exports.head = requester('HEAD')
