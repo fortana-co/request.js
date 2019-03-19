@@ -4,9 +4,9 @@
 [![NPM](https://img.shields.io/npm/v/request-dot-js.svg)](https://www.npmjs.com/package/request.js)
 [![npm bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/request-dot-js.svg)](https://www.npmjs.com/package/request.js)
 
-A ~1kB wrapper around `fetch`, with a convenient API for interacting with JSON APIs and support for retrying requests using exponential backoff.
+A ~1kB wrapper around `fetch` with convenient error handling, automatic JSON transforms, and support for exponential backoff.
 
-It works in the browser, on the server (Node.js), and mobile apps (like React Native).
+It works in the browser, on the server (Node.js), and mobile apps (like React Native), has no dependencies, and ships with TypeScript declarations.
 
 
 ## Installation
@@ -17,7 +17,7 @@ It works in the browser, on the server (Node.js), and mobile apps (like React Na
 API: `async request(url[, options])`
 
 - `url`: a string
-- `options`: the fetch [__init__ object](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Syntax)
+- `options`: basically the fetch [__init__ object](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Syntax)
 
 ~~~js
 import request from 'request-dot-js'
@@ -58,9 +58,9 @@ If type is `'exception'`, these attributes are undefined.
 ### JSON by default
 __request.js__ is built for easy interaction with JSON APIs, the de facto standard for data exchange on the web.
 
-`request` adds `'content-type': 'application/json'` and `accept: 'application/json'` request headers by default. You can override this by passing your own `content-type` and `accept` headers. As with fetch and axios, header names are case insensitive.
+By default, `request` adds the `'content-type': 'application/json'` request header and automatically JSON stringifies `options.body`. If you don't want it to do this, pass `jsonIn: false` in `options`.
 
-If __content-type__ is not overridden, `request` automatically JSON stringifies `options.body`.
+Also by default, `request` reads `response.text` and tries to return parsed JSON for `data`. If you don't want it to do this, pass `jsonOut: false` in `options`, and it will return [the fetch Response object](https://developer.mozilla.org/en-US/docs/Web/API/Response) for `data` instead.
 
 ~~~js
 const { data, type, ...rest } = await request(
@@ -70,17 +70,17 @@ const { data, type, ...rest } = await request(
     body: { a: 'b', c: 'd' }, // body passed to JSON.stringify by default
   },
 )
+console.log(data.url) // data is parsed JSON by default
 ~~~
-
-If __accept__ is not overridden, `request` tries to return parsed JSON for `data`, else it returns the raw response string.
 
 ~~~js
-const { data } = await request('https://httpbin.org/get')
-console.log(data.url)
+const { data } = await request('https://httpbin.org/get', { jsonOut: false })
+const blob = await data.blob()
+console.log(blob)
 ~~~
 
 
-### Retry with exponential backoff
+### Retries with exponential backoff
 ~~~js
 import request from 'request-dot-js'
 
@@ -104,7 +104,7 @@ const { data, type, ...rest } = await request(
 )
 ~~~
 
-`request`'s `options` argument has a special `retry` key that can point to an object with __retry options__ (listed here with their default values):
+The `options` parameter has a special `retry` key that can point to an object with __retry options__ (listed here with their default values):
 
 - `retries`, 4
 - `delay`, 1000ms
@@ -120,7 +120,7 @@ If you want to set a custom condition for when to retry a request, pass your own
 The `shouldRetry` function also lets you react to individual retries before `request` is done executing all of them, if you want to do that. See the example above.
 
 
-## Convenience Methods
+### Convenience methods
 __request.js__ has convenience methods for the following HTTP methods: `DELETE`, `GET`, `HEAD`, `OPTIONS`, `PATCH`, `POST`, and `PUT`.
 
 ~~~js
@@ -131,11 +131,11 @@ const { data, type } = await request.delete('https://httpbin.org/delete')
 const { data, type } = await request.put('https://httpbin.org/put', { body: { a: 'b' } })
 ~~~
 
-These allow you to send non-GET requests without passing the `method` key in the `options` argument.
+These allow you to send non-GET requests without passing the `method` key in `options`.
 
 
 ### Query stringification
-__request.js__ comes with a function that converts a query `params` object to a query string. If you want a fancier `stringify` function, like the one in [qs](https://github.com/ljharb/qs), you can pass your own in the `options` argument.
+__request.js__ comes with a function that converts a query `params` object to a query string. If you want a fancier `stringify` function, like the one in [qs](https://github.com/ljharb/qs), you can pass your own in `options`.
 
 ~~~js
 import qs from 'qs'
@@ -147,11 +147,11 @@ const { data, type } = await request(
 ~~~
 
 
-### Request Cancellation
+### Request cancellation
 Little known fact, but this is actually [easy to do with fetch](https://developer.mozilla.org/en-US/docs/Web/API/AbortController), it's just not supported on older browsers.
 
 
-## TypeScript
+### TypeScript
 __request.js__ ships with [TypeScript declarations](https://github.com/fortana-co/request.js/blob/master/index.d.ts) and works great with TypeScript, with a few caveats.
 
 First, make sure you enable `esModuleInterop` if you're using TypeScript to compile your application. This option is enabled by default if you run `tsc --init`.
@@ -188,9 +188,10 @@ import { del } from 'request-dot-js'
 ## Why request.js?
 Why not axios, or just fetch? Unlike fetch, __request.js__ is very convenient to use:
 
-- JSON first
+- automatic JSON transforms
 - simple query params and response headers
 - no double `await` to read data
+- query params and response headers as object literals
 
 And unlike either of them, it doesn't require `try / catch` to handle exceptions. `const { data, type } = await request(...)` has all the info you need to handle successful requests, request errors, and connection errors. 
 

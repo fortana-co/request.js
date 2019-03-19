@@ -5,7 +5,6 @@ test('request: default request headers', async t => {
   const { data, type, status, statusText, url } = await request('https://httpbin.org/get')
   t.is(data.url, 'https://httpbin.org/get')
   t.is(data.headers['Content-Type'], 'application/json')
-  t.is(data.headers.Accept, 'application/json')
   t.is(type, 'success')
   t.is(status, 200)
   t.is(statusText, 'OK')
@@ -39,13 +38,19 @@ test('request: redirect manual', async t => {
   t.is(status, 302)
 })
 
+test('request: can override default content-type header, case insensitive', async t => {
+  const { data } = await request('https://httpbin.org/headers', { headers: { 'CONTENT-TYPE': '*/*' } })
+  t.is(data.headers['Content-Type'], '*/*')
+})
+
 // client code must manually stringify request body and parse response JSON
-test('request: custom request headers, case insensitive', async t => {
+test('request: jsonIn and jsonOut false', async t => {
   const { data } = await request(
     'https://httpbin.org/post',
-    { method: 'POST', headers: { 'CONTENT-TYPE': '*', 'accept': '*' }, body: JSON.stringify({ a: 'b', c: 'd' }) },
+    { method: 'POST', body: JSON.stringify({ a: 'b', c: 'd' }), jsonIn: false, jsonOut: false },
   )
-  const parsed = JSON.parse(data)
+  const text = await data.text()
+  const parsed = JSON.parse(text)
   t.deepEqual(parsed.json, { a: 'b', c: 'd' })
 })
 
