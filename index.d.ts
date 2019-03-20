@@ -16,7 +16,7 @@ export interface Retry {
 
 export interface Options {
   method?: string;
-  body?: {};
+  body?: any;
   params?: {};
   headers?: {};
   retry?: Retry;

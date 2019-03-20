@@ -5,6 +5,7 @@ test('request: default request headers', async t => {
   const { data, type, status, statusText, url } = await request('https://httpbin.org/get')
   t.is(data.url, 'https://httpbin.org/get')
   t.is(data.headers['Content-Type'], 'application/json')
+  t.is(data.headers['Accept'], 'application/json')
   t.is(type, 'success')
   t.is(status, 200)
   t.is(statusText, 'OK')

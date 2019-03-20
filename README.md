@@ -60,7 +60,7 @@ __request.js__ is built for easy interaction with JSON APIs, the de facto standa
 
 By default, `request` adds the `'content-type': 'application/json'` request header and automatically JSON stringifies `options.body`. If you don't want it to do this, pass `jsonIn: false` in `options`.
 
-Also by default, `request` reads `response.text` and tries to return parsed JSON for `data`. If you don't want it to do this, pass `jsonOut: false` in `options`, and it will return [the fetch Response object](https://developer.mozilla.org/en-US/docs/Web/API/Response) for `data` instead.
+By default, `request` also adds the `'accept': 'application/json'` request header and tries to return parsed JSON for `data`. If you don't want it to do this, pass `jsonOut: false` in `options`, and it will return [the fetch Response object](https://developer.mozilla.org/en-US/docs/Web/API/Response) for `data` instead.
 
 ~~~js
 const { data, type, ...rest } = await request(
@@ -189,9 +189,9 @@ import { del } from 'request-dot-js'
 Why not axios, or just fetch? Unlike fetch, __request.js__ is very convenient to use:
 
 - automatic JSON transforms
-- simple query params and response headers
-- no double `await` to read data
 - query params and response headers as object literals
+- no double `await` to read data
+- automatically removes body for GET and HEAD requests
 
 And unlike either of them, it doesn't require `try / catch` to handle exceptions. `const { data, type } = await request(...)` has all the info you need to handle successful requests, request errors, and connection errors. 
 

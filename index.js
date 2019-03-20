@@ -50,8 +50,13 @@ const request = async (url, { headers, retry, jsonIn = true, jsonOut = true, ...
   let data,
     type,
     fields = {}
+
+  const jsonHeaders = {}
+  if (jsonIn) jsonHeaders['content-type'] = 'application/json'
+  if (jsonOut) jsonHeaders.accept = 'application/json'
+
   const requestHeaders = {
-    ...(jsonIn ? { 'content-type': 'application/json' } : {}),
+    ...jsonHeaders,
     ...lowercased(headers || {}),
   }
 
