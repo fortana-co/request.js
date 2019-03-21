@@ -21,7 +21,6 @@ export interface Options {
   headers?: {};
   retry?: Retry;
   stringify?: (obj?: {}) => string;
-  jsonIn?: boolean;
   jsonOut?: boolean;
 }
 

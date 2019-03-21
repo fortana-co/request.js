@@ -46,7 +46,7 @@ test('request: can override default content-type header, case insensitive', asyn
 })
 
 // client code must manually parse response JSON, no double stringify
-test('request: jsonIn and jsonOut false', async t => {
+test('request: jsonOut false', async t => {
   const { data } = await request(
     'https://httpbin.org/post',
     { method: 'POST', body: JSON.stringify({ a: 'b', c: 'd' }), jsonOut: false },
