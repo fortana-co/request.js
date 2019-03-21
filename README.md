@@ -67,16 +67,18 @@ const { data, type, ...rest } = await request(
   'https://httpbin.org/post',
   {
     method: 'POST', // default method is 'GET'
-    body: { a: 'b', c: 'd' }, // body passed to JSON.stringify by default
+    body: { a: 'b', c: 'd' }, // object body automatically passed to JSON.stringify
   },
 )
-console.log(data.url) // data is parsed JSON by default
+if (type === 'success') console.log(data.url) // data is parsed JSON by default
 ~~~
 
 ~~~js
-const { data } = await request('https://httpbin.org/post', { jsonOut: false })
-const blob = await data.blob()
-console.log(blob)
+const { data, type } = await request('https://httpbin.org/post', { jsonOut: false })
+if (type === 'success') {
+  const blob = await data.blob()
+  console.log(blob)
+}
 ~~~
 
 
@@ -195,7 +197,7 @@ Why not axios, or just fetch? Unlike fetch, __request.js__ is very convenient to
 
 And unlike either of them, it doesn't require `try / catch` to handle exceptions. `const { data, type } = await request(...)` has all the info you need to handle successful requests, request errors, and connection errors. 
 
-This design gives __request.js__ flexible, built-in support for retries with exponential backoff.
+This design leads to another feature the others don't have: flexible, built-in support for retries with exponential backoff.
 
 
 ## Dependencies
