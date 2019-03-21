@@ -58,7 +58,7 @@ If type is `'exception'`, these attributes are undefined.
 ### JSON by default
 __request.js__ is built for easy interaction with JSON APIs, the de facto standard for data exchange on the web.
 
-By default, `request` adds the `'content-type': 'application/json'` request header and automatically JSON stringifies `options.body`. If you don't want it to do this, pass `jsonIn: false` in `options`.
+If you pass an object literal or an array for `options.body`, `request` adds the `'content-type': 'application/json'` request header and JSON stringifies the body.
 
 By default, `request` also adds the `'accept': 'application/json'` request header and tries to return parsed JSON for `data`. If you don't want it to do this, pass `jsonOut: false` in `options`, and it will return [the fetch Response object](https://developer.mozilla.org/en-US/docs/Web/API/Response) for `data` instead.
 
@@ -74,7 +74,7 @@ console.log(data.url) // data is parsed JSON by default
 ~~~
 
 ~~~js
-const { data } = await request('https://httpbin.org/get', { jsonOut: false })
+const { data } = await request('https://httpbin.org/post', { jsonOut: false })
 const blob = await data.blob()
 console.log(blob)
 ~~~

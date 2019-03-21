@@ -1,6 +1,6 @@
 {
   "name": "request-dot-js",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "author": "Kyle Bebak <kylebebak@gmail.com>",
   "description": "A ~1kB wrapper around `fetch` with convenient error handling, automatic JSON transforms, and support for exponential backoff.",
   "main": "./index.js",

@@ -26,14 +26,33 @@ const lowercased = object => {
   return obj
 }
 
+const shouldStringify = object => {
+  const objectType = {}.toString.call(object)
+  return objectType === '[object Object]' || objectType === '[object Array]'
+}
+
 const _request = async (
   url,
-  { method = 'GET', body = {}, params = {}, headers = {}, stringify, jsonIn, ...rest } = {},
+  { method = 'GET', headers = {}, params = {}, body, jsonOut, stringify, ...rest } = {},
 ) => {
+  const jsonHeaders = {}
+  let requestBody = body
+
+  if (shouldStringify(body)) {
+    jsonHeaders['content-type'] = 'application/json'
+    requestBody = JSON.stringify(body)
+  }
+  if (jsonOut) jsonHeaders.accept = 'application/json'
+
+  const requestHeaders = {
+    ...jsonHeaders,
+    ...lowercased(headers),
+  }
+
   const options = {
     method,
-    body: jsonIn ? JSON.stringify(body) : body,
-    headers,
+    headers: requestHeaders,
+    body: requestBody,
     ...rest,
   }
 
@@ -46,22 +65,13 @@ const _request = async (
  * Returns response object with `data`, `type` (one of 'success', 'error', 'exception'),
  * along with other response properties.
  */
-const request = async (url, { headers, retry, jsonIn = true, jsonOut = true, ...rest } = {}) => {
+const request = async (url, { retry, jsonOut = true, ...rest } = {}) => {
   let data,
     type,
     fields = {}
 
-  const jsonHeaders = {}
-  if (jsonIn) jsonHeaders['content-type'] = 'application/json'
-  if (jsonOut) jsonHeaders.accept = 'application/json'
-
-  const requestHeaders = {
-    ...jsonHeaders,
-    ...lowercased(headers || {}),
-  }
-
   try {
-    const response = await _request(url, { headers: requestHeaders, jsonIn, ...rest })
+    const response = await _request(url, { jsonOut, ...rest })
     const { status, statusText, headers: responseHeaders, url: responseUrl } = response
     fields = { status, statusText, headers: toObject(responseHeaders), url: responseUrl }
 
@@ -100,7 +110,7 @@ const request = async (url, { headers, retry, jsonIn = true, jsonOut = true, ...
         multiplier,
         shouldRetry,
       }
-      return request(url, { headers, retry: nextRetry, jsonIn, jsonOut, ...rest })
+      return request(url, { retry: nextRetry, jsonOut, ...rest })
     }
   }
   return response

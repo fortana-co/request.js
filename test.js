@@ -1,10 +1,10 @@
 import test from 'ava'
 import request from '.'
 
-test('request: default request headers', async t => {
+test('request: type, status, statusText, url and default headers', async t => {
   const { data, type, status, statusText, url } = await request('https://httpbin.org/get')
   t.is(data.url, 'https://httpbin.org/get')
-  t.is(data.headers['Content-Type'], 'application/json')
+  t.is(data.headers['Content-Type'], undefined)
   t.is(data.headers['Accept'], 'application/json')
   t.is(type, 'success')
   t.is(status, 200)
@@ -22,8 +22,9 @@ test('request: custom stringify', async t => {
   t.is(data.url, 'https://httpbin.org/get?a=b')
 })
 
-test('request: json body', async t => {
+test('request: json body, including content-type header', async t => {
   const { data } = await request('https://httpbin.org/post', { method: 'POST', body: { a: 'b', c: 'd' } })
+  t.is(data.headers['Content-Type'], 'application/json')
   t.deepEqual(data.json, { a: 'b', c: 'd' })
 })
 
@@ -44,11 +45,11 @@ test('request: can override default content-type header, case insensitive', asyn
   t.is(data.headers['Content-Type'], '*/*')
 })
 
-// client code must manually stringify request body and parse response JSON
+// client code must manually parse response JSON, no double stringify
 test('request: jsonIn and jsonOut false', async t => {
   const { data } = await request(
     'https://httpbin.org/post',
-    { method: 'POST', body: JSON.stringify({ a: 'b', c: 'd' }), jsonIn: false, jsonOut: false },
+    { method: 'POST', body: JSON.stringify({ a: 'b', c: 'd' }), jsonOut: false },
   )
   const text = await data.text()
   const parsed = JSON.parse(text)
