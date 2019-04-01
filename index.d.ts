@@ -15,13 +15,14 @@ export interface Retry {
 }
 
 export interface Options {
-  method?: string
+  method?: 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT'
   body?: any
   params?: {}
   headers?: {}
   retry?: Retry
   stringify?: (obj?: {}) => string
   jsonOut?: boolean
+  [others: string]: any
 }
 
 export function del(url: string, options?: Options): Promise<Response>

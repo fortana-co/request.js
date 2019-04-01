@@ -12,6 +12,9 @@
 # jest
 /coverage
 
+# typescript
+test.js
+
 # misc
 .DS_Store
 .env

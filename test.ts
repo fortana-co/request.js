@@ -1,5 +1,5 @@
 import test from 'ava'
-import request, { post, del, get } from 'index.js'
+import request, { post, del, get } from '.'
 
 test('request: type, status, statusText, url and default headers', async t => {
   const { data, type, status, statusText, url } = await request('https://httpbin.org/get')
