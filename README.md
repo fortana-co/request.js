@@ -117,7 +117,7 @@ If you pass a `retry` object, even an empty one, and your request throws an exce
 
 If on any retry you regain connectivity and type is `'success'` or `'error'` instead of `'exception'`, the `request` method stops retrying your request and returns the usual `{ data, type, ...rest }`.
 
-If you want to set a custom condition for when to retry a request, pass your own `shouldRetry` function. It receives the usual response, `{ data, type, ...rest }`, and the current backoff vaules, `{ retries, delay }`. If it returns a falsy value __request.js__ stops retrying your request.
+If you want to set a custom condition for when to retry a request, pass your own `shouldRetry` function. It receives the usual response, `{ data, type, ...rest }`, and the current backoff values, `{ retries, delay }`. If it returns a falsy value __request.js__ stops retrying your request.
 
 The `shouldRetry` function also lets you react to individual retries before `request` is done executing all of them, if you want to do that. See the example above.
 
