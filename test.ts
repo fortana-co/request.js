@@ -1,5 +1,5 @@
 import test from 'ava'
-import request from '.'
+import request, { post, del, get } from 'index.js'
 
 test('request: type, status, statusText, url and default headers', async t => {
   const { data, type, status, statusText, url } = await request('https://httpbin.org/get')
@@ -75,12 +75,12 @@ test('request: exception', async t => {
 })
 
 test('request: convenience methods', async t => {
-  let response = await request.post('https://httpbin.org/post', { body: { a: 'b' } })
+  let response = await post('https://httpbin.org/post', { body: { a: 'b' } })
   t.is(response.type, 'success')
   t.is(response.data.json.a, 'b')
-  response = await request.delete('https://httpbin.org/delete')
+  response = await del('https://httpbin.org/delete')
   t.is(response.type, 'success')
-  response = await request.get('https://httpbin.org/post')
+  response = await get('https://httpbin.org/post')
   t.is(response.type, 'error')
 })
 
@@ -116,10 +116,10 @@ test.cb('retry: callback style', t => {
 test.cb('retry: retries on custom condition', t => {
   t.plan(4)
 
-  const shouldRetry = ({ status }, { retries }) => {
+  const shouldRetry = (response, { retries }) => {
     t.pass()
     if (retries <= 1) t.end()
-    return status === 500
+    return response.status === 500
   }
   request('https://httpbin.org/status/500', { retry: { shouldRetry, delay: 125 } }, )
 })
