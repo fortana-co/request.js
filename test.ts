@@ -1,5 +1,5 @@
 import test from 'ava'
-import request, { post, del, get } from '.'
+import request, { post, del, get, IRetry } from '.'
 
 test('request: type, status, statusText, url and default headers', async t => {
   const { data, type, status, statusText, url } = await request('https://httpbin.org/get')
@@ -88,7 +88,7 @@ test('request: convenience methods', async t => {
 test.cb('retry: retries on exception, increases delay', t => {
   t.plan(5)
 
-  const shouldRetry = ({ type }, { retries, delay }) => {
+  const shouldRetry: IRetry['shouldRetry'] = ({ type }, { retries, delay }) => {
     t.is(type, 'exception')
     if (retries <= 1) {
       t.is(delay, 1000)
@@ -116,7 +116,7 @@ test.cb('retry: callback style', t => {
 test.cb('retry: retries on custom condition', t => {
   t.plan(4)
 
-  const shouldRetry = (response, { retries }) => {
+  const shouldRetry: IRetry['shouldRetry'] = (response, { retries }) => {
     t.pass()
     if (retries <= 1) t.end()
     return response.status === 500
@@ -125,7 +125,7 @@ test.cb('retry: retries on custom condition', t => {
 })
 
 test('retry: no exception -> no retry', async t => {
-  const shouldRetry = ({ type }, { retries }) => {
+  const shouldRetry: IRetry['shouldRetry'] = ({ type }, { retries }) => {
     t.pass()
     if (retries < 3) t.fail()
     return type === 'exception'

@@ -99,7 +99,7 @@ const request = async (url, { retry, jsonOut = true, ...rest } = {}) => {
       retries = 4,
       delay = 1000,
       multiplier = 2,
-      shouldRetry = r => r.exception !== undefined,
+      shouldRetry = r => r.type === 'exception',
     } = retry
     if (retries > 0 && shouldRetry(response, { retries, delay })) {
       await timeout(delay)
