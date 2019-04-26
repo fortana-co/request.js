@@ -1,13 +1,13 @@
 module.exports = {
-  "parser": "babel-eslint",
-  "rules": {
-    "linebreak-style": [2, "unix"],
-    "no-unused-vars": 2,
+  parser: 'babel-eslint',
+  rules: {
+    'linebreak-style': [2, 'unix'],
+    'no-unused-vars': 2,
   },
-  "env": {
-    "es6": true,
-    "node": true,
-    "browser": true,
+  env: {
+    es6: true,
+    node: true,
+    browser: true,
   },
-  "extends": "eslint:recommended",
+  extends: 'eslint:recommended',
 }
