@@ -31,10 +31,7 @@ const shouldStringify = object => {
   return objectType === '[object Object]' || objectType === '[object Array]'
 }
 
-const _request = async (
-  url,
-  { method = 'GET', headers = {}, params = {}, body, jsonOut, stringify, ...rest } = {},
-) => {
+const _request = async (url, { method = 'GET', headers = {}, params = {}, body, jsonOut, stringify, ...rest } = {}) => {
   const jsonHeaders = {}
   let requestBody = body
 
@@ -95,12 +92,7 @@ const request = async (url, { retry, jsonOut = true, ...rest } = {}) => {
 
   const response = { ...fields, data, type }
   if (retry) {
-    const {
-      retries = 4,
-      delay = 1000,
-      multiplier = 2,
-      shouldRetry = r => r.type === 'exception',
-    } = retry
+    const { retries = 4, delay = 1000, multiplier = 2, shouldRetry = r => r.type === 'exception' } = retry
     if (retries > 0 && shouldRetry(response, { retries, delay })) {
       await timeout(delay)
 

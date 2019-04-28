@@ -1,42 +1,64 @@
-export interface IResponse {
-  data: any
-  type: 'success' | 'error'
+interface BaseResponse {
   status: number
   statusText: string
   url: string
   headers: { [key: string]: string }
 }
 
-export interface IExceptionResponse {
+export interface SuccessResponse<T = any> extends BaseResponse {
+  data: T
+  type: 'success'
+}
+
+export interface ErrorResponse<T = any> extends BaseResponse {
+  data: T
+  type: 'error'
+}
+
+export interface ExceptionResponse {
   data: Error
   type: 'exception'
 }
 
-export type IAnyResponse = IResponse | IExceptionResponse
+export type Response<T = any, ET = any> = SuccessResponse<T> | ErrorResponse<ET> | ExceptionResponse
 
-export interface IRetry {
+export interface Retry<T = any, ET = any> {
   retries?: number
   delay?: number
   multiplier?: number
-  shouldRetry?: (response: IAnyResponse, retryInfo: { retries: number, delay: number }) => boolean
+  shouldRetry?: (response: Response<T, ET>, retryInfo: { retries: number; delay: number }) => boolean
 }
 
-export interface IOptions {
-  method?: 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT'
+export interface Options<T = any, ET = any> {
+  method?:
+    | 'delete'
+    | 'get'
+    | 'head'
+    | 'options'
+    | 'patch'
+    | 'post'
+    | 'put'
+    | 'DELETE'
+    | 'GET'
+    | 'HEAD'
+    | 'OPTIONS'
+    | 'PATCH'
+    | 'POST'
+    | 'PUT'
   body?: any
   params?: {}
   headers?: {}
-  retry?: IRetry
+  retry?: Retry<T, ET>
   stringify?: (obj?: {}) => string
   jsonOut?: boolean
   [others: string]: any
 }
 
-export function del(url: string, options?: IOptions): Promise<IAnyResponse>
-export function get(url: string, options?: IOptions): Promise<IAnyResponse>
-export function head(url: string, options?: IOptions): Promise<IAnyResponse>
-export function options(url: string, options?: IOptions): Promise<IAnyResponse>
-export function patch(url: string, options?: IOptions): Promise<IAnyResponse>
-export function post(url: string, options?: IOptions): Promise<IAnyResponse>
-export function put(url: string, options?: IOptions): Promise<IAnyResponse>
-export default function request(url: string, options?: IOptions): Promise<IAnyResponse>
+export function del<T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<Response<T, ET>>
+export function get<T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<Response<T, ET>>
+export function head<T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<Response<T, ET>>
+export function options<T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<Response<T, ET>>
+export function patch<T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<Response<T, ET>>
+export function post<T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<Response<T, ET>>
+export function put<T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<Response<T, ET>>
+export default function request<T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<Response<T, ET>>

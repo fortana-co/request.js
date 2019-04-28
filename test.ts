@@ -1,74 +1,106 @@
 import test from 'ava'
-import request, { post, del, get, IRetry, IResponse, IExceptionResponse } from '.'
+import request, {
+  post,
+  del,
+  get,
+  Retry,
+  SuccessResponse,
+  ErrorResponse,
+  ExceptionResponse,
+} from '.'
 
 test('request: type, status, statusText, url and default headers', async t => {
-  const { data, type, status, statusText, url } = await request('https://httpbin.org/get') as IResponse
-  t.is(data.url, 'https://httpbin.org/get')
-  t.is(data.headers['Content-Type'], undefined)
-  t.is(data.headers['Accept'], 'application/json')
-  t.is(type, 'success')
-  t.is(status, 200)
-  t.is(statusText, 'OK')
-  t.is(url, 'https://httpbin.org/get')
+  interface SuccessData {
+    origin: string
+    url: string
+    headers: { [key: string]: string }
+  }
+
+  const response = await request<SuccessData>('https://httpbin.org/get')
+  if (response.type === 'success') {
+    const { data, type, status, statusText, url } = response
+    t.is(data.url, 'https://httpbin.org/get')
+    t.is(data.headers['Content-Type'], undefined)
+    t.is(data.headers['Accept'], 'application/json')
+    t.is(type, 'success')
+    t.is(status, 200)
+    t.is(statusText, 'OK')
+    t.is(url, 'https://httpbin.org/get')
+  }
 })
 
 test('request: querystring', async t => {
-  const { data } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd', e: undefined } })
-  t.is(data.url, 'https://httpbin.org/get?a=b&c=d')
+  const response = (await request('https://httpbin.org/get', {
+    params: { a: 'b', c: 'd', e: undefined },
+  })) as SuccessResponse<{ url: string }>
+  t.is(response.data.url, 'https://httpbin.org/get?a=b&c=d')
 })
 
 test('request: custom stringify', async t => {
-  const { data } = await request('https://httpbin.org/get', { params: { a: 'b', c: 'd' }, stringify: () => 'a=b' })
+  const { data } = await request('https://httpbin.org/get', {
+    params: { a: 'b', c: 'd' },
+    stringify: () => 'a=b',
+  })
   t.is(data.url, 'https://httpbin.org/get?a=b')
 })
 
 test('request: json body, including content-type header', async t => {
-  const { data } = await request('https://httpbin.org/post', { method: 'POST', body: { a: 'b', c: 'd' } })
+  const { data } = await request('https://httpbin.org/post', {
+    method: 'POST',
+    body: { a: 'b', c: 'd' },
+  })
   t.is(data.headers['Content-Type'], 'application/json')
   t.deepEqual(data.json, { a: 'b', c: 'd' })
 })
 
 test('request: redirect', async t => {
-  const { data, status } = await request('https://httpbin.org/redirect-to?url=get') as IResponse
+  const { data, status } = (await request(
+    'https://httpbin.org/redirect-to?url=get',
+  )) as SuccessResponse
   t.is(data.url, 'https://httpbin.org/get')
   t.is(status, 200)
 })
 
 test('request: redirect manual', async t => {
-  const { type, status } = await request('https://httpbin.org/redirect-to?url=get', { redirect: 'manual' }) as IResponse
+  const { type, status } = (await request('https://httpbin.org/redirect-to?url=get', {
+    redirect: 'manual',
+  })) as ErrorResponse
   t.is(type, 'error')
   t.is(status, 302)
 })
 
 test('request: can override default content-type header, case insensitive', async t => {
-  const { data } = await request('https://httpbin.org/headers', { headers: { 'CONTENT-TYPE': '*/*' } })
+  const { data } = await request('https://httpbin.org/headers', {
+    headers: { 'CONTENT-TYPE': '*/*' },
+  })
   t.is(data.headers['Content-Type'], '*/*')
 })
 
 // client code must manually parse response JSON, no double stringify
 test('request: jsonOut false', async t => {
-  const { data } = await request(
-    'https://httpbin.org/post',
-    { method: 'POST', body: JSON.stringify({ a: 'b', c: 'd' }), jsonOut: false },
-  )
+  const { data } = await request('https://httpbin.org/post', {
+    method: 'POST',
+    body: JSON.stringify({ a: 'b', c: 'd' }),
+    jsonOut: false,
+  })
   const text = await data.text()
   const parsed = JSON.parse(text)
   t.deepEqual(parsed.json, { a: 'b', c: 'd' })
 })
 
 test('request: response headers are object literal', async t => {
-  const { headers } = await request('https://httpbin.org/get') as IResponse
+  const { headers } = (await request('https://httpbin.org/get')) as SuccessResponse
   t.is(headers['content-encoding'], 'gzip')
 })
 
 test('request: error', async t => {
-  const { type, status } = await request('https://httpbin.org/GET') as IResponse
+  const { type, status } = (await request('https://httpbin.org/GET')) as ErrorResponse
   t.is(status, 404)
   t.is(type, 'error')
 })
 
 test('request: exception', async t => {
-  const { data, type, ...rest } = await request('https://httpbin.smorg/get') as IExceptionResponse
+  const { data, type, ...rest } = (await request('https://httpbin.smorg/get')) as ExceptionResponse
   t.is(data.name, 'FetchError') // would be 'TypeError' in a browser
   t.is(type, 'exception')
   t.deepEqual(rest, {})
@@ -88,7 +120,7 @@ test('request: convenience methods', async t => {
 test.cb('retry: retries on exception, increases delay', t => {
   t.plan(5)
 
-  const shouldRetry: IRetry['shouldRetry'] = ({ type }, { retries, delay }) => {
+  const shouldRetry: Retry['shouldRetry'] = ({ type }, { retries, delay }) => {
     t.is(type, 'exception')
     if (retries <= 1) {
       t.is(delay, 1000)
@@ -116,19 +148,21 @@ test.cb('retry: callback style', t => {
 test.cb('retry: retries on custom condition', t => {
   t.plan(4)
 
-  const shouldRetry: IRetry['shouldRetry'] = (response: IResponse, { retries }) => {
+  const shouldRetry: Retry['shouldRetry'] = (response: SuccessResponse, { retries }) => {
     t.pass()
     if (retries <= 1) t.end()
     return response.status === 500
   }
-  request('https://httpbin.org/status/500', { retry: { shouldRetry, delay: 125 } }, )
+  request('https://httpbin.org/status/500', { retry: { shouldRetry, delay: 125 } })
 })
 
 test('retry: no exception -> no retry', async t => {
-  const shouldRetry: IRetry['shouldRetry'] = ({ type }, { retries }) => {
+  const shouldRetry: Retry['shouldRetry'] = ({ type }, { retries }) => {
     t.pass()
     if (retries < 3) t.fail()
     return type === 'exception'
   }
-  await request('https://httpbin.org/status/500', { retry: { shouldRetry, retries: 3, delay: 125 } })
+  await request('https://httpbin.org/status/500', {
+    retry: { shouldRetry, retries: 3, delay: 125 },
+  })
 })
