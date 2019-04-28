@@ -154,9 +154,9 @@ Little known fact, but this is actually [easy to do with fetch](https://develope
 
 
 ### TypeScript
-__request.js__ ships with [TypeScript declarations](https://github.com/fortana-co/request.js/blob/master/index.d.ts) and works great with TypeScript, with a few caveats.
+__request.js__ ships with [TypeScript declarations](https://github.com/fortana-co/request.js/blob/master/index.d.ts) and works great with TypeScript. [Check out examples here](https://github.com/fortana-co/request.js/blob/master/test.ts).
 
-First, make sure you enable `esModuleInterop` if you're using TypeScript to compile your application. This option is enabled by default if you run `tsc --init`.
+Make sure you enable `esModuleInterop` if you're using TypeScript to compile your application. This option is enabled by default if you run `tsc --init`.
 
 Regarding convenience methods, you can't do this:
 

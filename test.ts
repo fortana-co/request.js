@@ -1,8 +1,8 @@
 import test from 'ava'
-import request, { post, del, get, IRetry } from '.'
+import request, { post, del, get, IRetry, IResponse, IExceptionResponse } from '.'
 
 test('request: type, status, statusText, url and default headers', async t => {
-  const { data, type, status, statusText, url } = await request('https://httpbin.org/get')
+  const { data, type, status, statusText, url } = await request('https://httpbin.org/get') as IResponse
   t.is(data.url, 'https://httpbin.org/get')
   t.is(data.headers['Content-Type'], undefined)
   t.is(data.headers['Accept'], 'application/json')
@@ -29,13 +29,13 @@ test('request: json body, including content-type header', async t => {
 })
 
 test('request: redirect', async t => {
-  const { data, status } = await request('https://httpbin.org/redirect-to?url=get')
+  const { data, status } = await request('https://httpbin.org/redirect-to?url=get') as IResponse
   t.is(data.url, 'https://httpbin.org/get')
   t.is(status, 200)
 })
 
 test('request: redirect manual', async t => {
-  const { type, status } = await request('https://httpbin.org/redirect-to?url=get', { redirect: 'manual' })
+  const { type, status } = await request('https://httpbin.org/redirect-to?url=get', { redirect: 'manual' }) as IResponse
   t.is(type, 'error')
   t.is(status, 302)
 })
@@ -57,19 +57,19 @@ test('request: jsonOut false', async t => {
 })
 
 test('request: response headers are object literal', async t => {
-  const { headers } = await request('https://httpbin.org/get')
+  const { headers } = await request('https://httpbin.org/get') as IResponse
   t.is(headers['content-encoding'], 'gzip')
 })
 
 test('request: error', async t => {
-  const { type, status } = await request('https://httpbin.org/GET')
+  const { type, status } = await request('https://httpbin.org/GET') as IResponse
   t.is(status, 404)
   t.is(type, 'error')
 })
 
 test('request: exception', async t => {
-  const { data, type, ...rest } = await request('https://httpbin.smorg/get')
-  t.is(data.code, 'ENOTFOUND')
+  const { data, type, ...rest } = await request('https://httpbin.smorg/get') as IExceptionResponse
+  t.is(data.name, 'FetchError') // would be 'TypeError' in a browser
   t.is(type, 'exception')
   t.deepEqual(rest, {})
 })
@@ -116,7 +116,7 @@ test.cb('retry: callback style', t => {
 test.cb('retry: retries on custom condition', t => {
   t.plan(4)
 
-  const shouldRetry: IRetry['shouldRetry'] = (response, { retries }) => {
+  const shouldRetry: IRetry['shouldRetry'] = (response: IResponse, { retries }) => {
     t.pass()
     if (retries <= 1) t.end()
     return response.status === 500
