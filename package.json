@@ -29,8 +29,8 @@
   },
   "scripts": {
     "test": "tsc ; eslint index.ts stringify.ts && prettier --check index.ts stringify.ts && ava -v",
-    "prettier-check": "prettier --check index.js stringify.js",
-    "prettier": "prettier --write index.js stringify.js"
+    "prettier-check": "prettier --check index.ts stringify.ts",
+    "prettier": "prettier --write index.ts stringify.ts"
   },
   "dependencies": {},
   "husky": {
