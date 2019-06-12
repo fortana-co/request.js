@@ -15,7 +15,7 @@ const stringifyPrimitive = function(v: any): string | number {
   }
 }
 
-module.exports = function(obj) {
+module.exports = function(obj: any): string {
   if (!obj) return ''
 
   const sep = '&'
