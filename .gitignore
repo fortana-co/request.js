@@ -18,3 +18,5 @@ test.js
 # misc
 .DS_Store
 .env
+
+*.js

@@ -28,7 +28,7 @@
     "typescript": "^3.5.1"
   },
   "scripts": {
-    "test": "tsc ; eslint index.js stringify.ts && prettier --check index.js stringify.ts && ava -v",
+    "test": "tsc ; eslint index.ts stringify.ts && prettier --check index.ts stringify.ts && ava -v",
     "prettier-check": "prettier --check index.js stringify.js",
     "prettier": "prettier --write index.js stringify.js"
   },

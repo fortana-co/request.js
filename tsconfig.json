@@ -7,6 +7,6 @@
     "allowJs": true,
     "esModuleInterop": true
   },
-  "include": ["test.ts", "stringify.ts"],
+  "include": ["test.ts", "stringify.ts", "index.ts"],
   "exclude": ["node_modules"]
 }
