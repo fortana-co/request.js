@@ -1,13 +1,5 @@
 import test from 'ava'
-import request, {
-  post,
-  del,
-  get,
-  Retry,
-  SuccessResponse,
-  ErrorResponse,
-  ExceptionResponse,
-} from '.'
+import request, { del, get, post, Retry, SuccessResponse, ErrorResponse, ExceptionResponse, Response } from '.'
 
 test('request: type, status, statusText, url and default headers', async t => {
   interface SuccessData {
@@ -54,9 +46,7 @@ test('request: json body, including content-type header', async t => {
 })
 
 test('request: redirect', async t => {
-  const { data, status } = (await request(
-    'https://httpbin.org/redirect-to?url=get',
-  )) as SuccessResponse
+  const { data, status } = (await request('https://httpbin.org/redirect-to?url=get')) as SuccessResponse
   t.is(data.url, 'https://httpbin.org/get')
   t.is(status, 200)
 })
@@ -148,10 +138,10 @@ test.cb('retry: callback style', t => {
 test.cb('retry: retries on custom condition', t => {
   t.plan(4)
 
-  const shouldRetry: Retry['shouldRetry'] = (response: SuccessResponse, { retries }) => {
+  const shouldRetry: Retry['shouldRetry'] = (response: Response, { retries }) => {
     t.pass()
     if (retries <= 1) t.end()
-    return response.status === 500
+    return response.type !== 'exception' && response.status === 500
   }
   request('https://httpbin.org/status/500', { retry: { shouldRetry, delay: 125 } })
 })

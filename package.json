@@ -28,9 +28,9 @@
     "typescript": "^3.5.1"
   },
   "scripts": {
-    "test": "tsc ; eslint index.ts stringify.ts && prettier --check index.ts stringify.ts && ava -v",
-    "prettier-check": "prettier --check index.ts stringify.ts",
-    "prettier": "prettier --write index.ts stringify.ts"
+    "test": "tsc && prettier --check *.ts && ava -v",
+    "prettier-check": "prettier --check *.ts",
+    "prettier": "prettier --write *.ts"
   },
   "dependencies": {},
   "husky": {

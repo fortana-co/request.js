@@ -5,7 +5,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "allowJs": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "strict": true
   },
   "include": ["test.ts", "stringify.ts", "index.ts"],
   "exclude": ["node_modules"]

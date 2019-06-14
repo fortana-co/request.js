@@ -27,7 +27,7 @@ module.exports = function(obj: any): string {
 
       if (Array.isArray(obj[k])) {
         return obj[k]
-          .map(function(v) {
+          .map(function(v: any) {
             return ks + encodeURIComponent(stringifyPrimitive(v))
           })
           .join(sep)

@@ -1,38 +1,54 @@
+import {
+  Options,
+  Method,
+  Headers as ReqHeaders,
+  Retry,
+  Response as ReqResponse,
+  SuccessResponse,
+  ErrorResponse,
+  ExceptionResponse,
+} from './types'
 const defaultStringify = require('./stringify')
 
-let fetch
+let fetch: (url: string, options?: {}) => Promise<Response>
+//@ts-ignore
 const req = module => require(module)
+//@ts-ignore
 if (typeof window === 'undefined') fetch = req('node-fetch')
+//@ts-ignore
 else fetch = window.fetch
 
-const timeout = ms => {
+const timeout = (ms: number): Promise<string> => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const toQs = (params, stringify = defaultStringify) => {
+const toQs = (params: {}, stringify: { (params: {}): string } = defaultStringify): string => {
   const s = stringify(params)
   return s ? `?${s}` : ''
 }
 
-const toObject = headers => {
-  const headersObject = {}
+const toObject = (headers: Headers): { [propName: string]: string } => {
+  const headersObject: { [key: string]: any } = {}
   for (const pair of headers.entries()) headersObject[pair[0]] = pair[1]
   return headersObject
 }
 
-const lowercased = object => {
-  const obj = {}
+const lowercased = (object: { [key: string]: any }): { [key: string]: any } => {
+  const obj: { [key: string]: any } = {}
   for (const key of Object.keys(object)) obj[key.toLowerCase()] = object[key]
   return obj
 }
 
-const shouldStringify = object => {
+const shouldStringify = (object: {}): boolean => {
   const objectType = {}.toString.call(object)
   return objectType === '[object Object]' || objectType === '[object Array]'
 }
 
-const _request = async (url, { method = 'GET', headers = {}, params = {}, body, jsonOut, stringify, ...rest } = {}) => {
-  const jsonHeaders = {}
+async function _request(
+  url: string,
+  { method = 'GET', headers = {}, params = {}, body, jsonOut, stringify, ...rest }: Options,
+): Promise<Response> {
+  const jsonHeaders: ReqHeaders = {}
   let requestBody = body
 
   if (shouldStringify(body)) {
@@ -62,9 +78,14 @@ const _request = async (url, { method = 'GET', headers = {}, params = {}, body, 
  * Returns response object with `data`, `type` (one of 'success', 'error', 'exception'),
  * along with other response properties.
  */
-const request = async (url, { retry, jsonOut = true, ...rest } = {}) => {
-  let data,
-    type,
+
+export default async function request<T = any, ET = any>(
+  url: string,
+  options?: Options<T, ET>,
+): Promise<ReqResponse<T, ET>> {
+  const { retry, jsonOut = true, ...rest } = options || ({} as Options)
+  let data: T | ET | Error,
+    type: 'success' | 'error' | 'exception',
     fields = {}
 
   try {
@@ -77,10 +98,10 @@ const request = async (url, { retry, jsonOut = true, ...rest } = {}) => {
       try {
         data = JSON.parse(text)
       } catch (e) {
-        data = text
+        data = (text as unknown) as T
       }
     } else {
-      data = response
+      data = (response as unknown) as T
     }
 
     if (status < 300) type = 'success'
@@ -90,13 +111,13 @@ const request = async (url, { retry, jsonOut = true, ...rest } = {}) => {
     type = 'exception'
   }
 
-  const response = { ...fields, data, type }
+  const response: ReqResponse<T, ET> = { ...fields, data, type } as ReqResponse<T, ET>
   if (retry) {
-    const { retries = 4, delay = 1000, multiplier = 2, shouldRetry = r => r.type === 'exception' } = retry
+    const { retries = 4, delay = 1000, multiplier = 2, shouldRetry = r => r.type === 'exception' }: Retry<T, ET> = retry
     if (retries > 0 && shouldRetry(response, { retries, delay })) {
       await timeout(delay)
 
-      const nextRetry = {
+      const nextRetry: Retry<T, ET> = {
         retries: retries - 1,
         delay: delay * multiplier,
         multiplier,
@@ -108,14 +129,29 @@ const request = async (url, { retry, jsonOut = true, ...rest } = {}) => {
   return response
 }
 
-const requester = method => (url, options = {}) => request(url, { ...options, method })
+function requester(method: Method): typeof request {
+  return (url, options = {}) => request(url, { ...options, method })
+}
 
-module.exports = request
-module.exports.del = requester('DELETE')
-module.exports.delete = requester('DELETE')
-module.exports.get = requester('GET')
-module.exports.head = requester('HEAD')
-module.exports.options = requester('OPTIONS')
-module.exports.patch = requester('PATCH')
-module.exports.post = requester('POST')
-module.exports.put = requester('PUT')
+const del = requester('DELETE')
+const get = requester('GET')
+const head = requester('HEAD')
+const options = requester('OPTIONS')
+const patch = requester('PATCH')
+const post = requester('POST')
+const put = requester('PUT')
+
+export {
+  del,
+  get,
+  head,
+  options,
+  patch,
+  post,
+  put,
+  Retry,
+  SuccessResponse,
+  ErrorResponse,
+  ExceptionResponse,
+  ReqResponse as Response,
+}
