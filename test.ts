@@ -106,6 +106,16 @@ test('request: convenience methods', async t => {
   t.is(response.type, 'error')
 })
 
+test('request: convenience methods (properties of request)', async t => {
+  let response = await request.post('https://httpbin.org/post', { body: { a: 'b' } })
+  t.is(response.type, 'success')
+  t.is(response.data.json.a, 'b')
+  response = await request.del('https://httpbin.org/delete')
+  t.is(response.type, 'success')
+  response = await request.get('https://httpbin.org/post')
+  t.is(response.type, 'error')
+})
+
 // backoff
 test.cb('retry: retries on exception, increases delay', t => {
   t.plan(5)

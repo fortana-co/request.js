@@ -59,3 +59,18 @@ export interface Options<T = any, ET = any> {
   jsonOut?: boolean
   [others: string]: any
 }
+
+export interface RequestFn {
+  <T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<Response<T, ET>>
+}
+
+export interface RequestMod extends RequestFn {
+  delete: RequestFn
+  del: RequestFn
+  get: RequestFn
+  head: RequestFn
+  options: RequestFn
+  patch: RequestFn
+  post: RequestFn
+  put: RequestFn
+}
