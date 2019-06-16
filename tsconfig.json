@@ -4,7 +4,7 @@
     "module": "commonjs",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "allowJs": true,
+    "declaration": true,
     "esModuleInterop": true,
     "strict": true
   },

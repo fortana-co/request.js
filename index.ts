@@ -161,3 +161,4 @@ export {
 }
 
 export default request
+module.exports = request
