@@ -28,6 +28,8 @@
     "typescript": "^3.5.1"
   },
   "scripts": {
+    "build": "npm run test && npm run clean && tsc -p tsconfig-build.json",
+    "clean": "rm ./*.js",
     "test": "tsc && prettier --check *.ts && ava -v",
     "prettier-check": "prettier --check *.ts",
     "prettier": "prettier --write *.ts"
