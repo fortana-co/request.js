@@ -13,11 +13,8 @@ import {
 const defaultStringify = require('./stringify')
 
 let fetch: (url: string, options?: {}) => Promise<Response>
-//@ts-ignore
-const req = module => require(module)
-//@ts-ignore
+const req = (module: string): any => require(module)
 if (typeof window === 'undefined') fetch = req('node-fetch')
-//@ts-ignore
 else fetch = window.fetch
 
 const timeout = (ms: number): Promise<string> => {
@@ -111,7 +108,7 @@ let request = <RequestMod>(
       type = 'exception'
     }
 
-    const response: ReqResponse<T, ET> = { ...fields, data, type } as ReqResponse<T, ET>
+    const response = { ...fields, data, type } as ReqResponse<T, ET>
     if (retry) {
       const {
         retries = 4,
