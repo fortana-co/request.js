@@ -6,8 +6,9 @@
     "noUnusedParameters": true,
     "declaration": true,
     "esModuleInterop": true,
-    "strict": true
+    "strict": true,
+    "outDir": "."
   },
-  "include": ["test.ts", "stringify.ts", "index.ts"],
+  "include": ["./src/*.ts" ],
   "exclude": ["node_modules"]
 }
