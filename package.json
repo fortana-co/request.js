@@ -1,6 +1,6 @@
 {
-  "name": "request-dot-js-test",
-  "version": "3.1.0",
+  "name": "request-dot-js-typescript",
+  "version": "3.1.2",
   "author": "Kyle Bebak <kylebebak@gmail.com>",
   "description": "A ~1kB wrapper around `fetch` with convenient error handling, automatic JSON transforms, and support for exponential backoff.",
   "main": "./index.js",
@@ -29,8 +29,7 @@
   },
   "scripts": {
     "build": "npm run test",
-    "clean": "rm ./*.js ./*.d.ts",
-    "test": "tsc && prettier --check ./src/*.ts && ava -v",
+    "test": "tsc && prettier --check *.ts && ava -v",
     "prettier-check": "prettier --check *.ts",
     "prettier": "prettier --write *.ts"
   },
