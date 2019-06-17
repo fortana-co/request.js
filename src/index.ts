@@ -6,6 +6,7 @@ import {
   RequestFn,
   RequestMod as RequestModule,
   Response as ReqResponse,
+  BaseResponse,
   SuccessResponse,
   ErrorResponse,
   ExceptionResponse,
@@ -80,34 +81,30 @@ async function _request(
 
 const request = (async <T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<ReqResponse<T, ET>> => {
   const { retry, jsonOut = true, ...rest } = options || ({} as Options)
-  let data: T | ET | Error,
-    type: 'success' | 'error' | 'exception',
-    fields = {}
+  let response: SuccessResponse<T> | ErrorResponse<ET> | ExceptionResponse, data
 
   try {
-    const response = await _request(url, { jsonOut, ...rest })
-    const { status, statusText, headers: responseHeaders, url: responseUrl } = response
-    fields = { status, statusText, headers: toObject(responseHeaders), url: responseUrl }
+    const res = await _request(url, { jsonOut, ...rest })
+    const { status, statusText, headers: responseHeaders, url: responseUrl } = res
+    const fields: BaseResponse = { status, statusText, headers: toObject(responseHeaders), url: responseUrl }
 
     if (jsonOut) {
-      const text = await response.text()
+      const text = await res.text()
       try {
         data = JSON.parse(text)
       } catch (e) {
-        data = (text as unknown) as T
+        data = text
       }
     } else {
-      data = (response as unknown) as T
+      data = res
     }
 
-    if (status < 300) type = 'success'
-    else type = 'error'
+    if (status < 300) response = { ...fields, data, type: 'success' }
+    else response = { ...fields, data, type: 'error' }
   } catch (e) {
-    data = e
-    type = 'exception'
+    response = { data: e, type: 'exception' }
   }
 
-  const response = { ...fields, data, type } as ReqResponse<T, ET>
   if (retry) {
     const { retries = 4, delay = 1000, multiplier = 2, shouldRetry = r => r.type === 'exception' }: Retry<T, ET> = retry
     if (retries > 0 && shouldRetry(response, { retries, delay })) {
