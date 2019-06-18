@@ -5,4 +5,7 @@ node_modules
 .*.md
 
 *.gif
- .vscode
+.vscode
+
+test.ts
+test.js
