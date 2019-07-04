@@ -209,4 +209,4 @@ If you use __request.js__ on the server, [node-fetch](https://github.com/bitinn/
 
 
 ## Development and tests
-Clone the repo, then `npm install`, then `npm run test`.
+Clone the repo, then `yarn`, then `npm run test`.

@@ -24,3 +24,5 @@ test.js
 
 *.js
 *.d.ts
+
+package-lock.json
