@@ -25,4 +25,5 @@ test.js
 *.js
 *.d.ts
 
+!prettierrc.js
 package-lock.json

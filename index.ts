@@ -144,6 +144,7 @@ export {
   post,
   put,
   Retry,
+  Options,
   SuccessResponse,
   ErrorResponse,
   ExceptionResponse,
