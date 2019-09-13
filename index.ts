@@ -135,21 +135,9 @@ const patch = (request.patch = requester('PATCH'))
 const post = (request.post = requester('POST'))
 const put = (request.put = requester('PUT'))
 
-export {
-  del,
-  get,
-  head,
-  options,
-  patch,
-  post,
-  put,
-  Retry,
-  Options,
-  SuccessResponse,
-  ErrorResponse,
-  ExceptionResponse,
-  ReqResponse as Response,
-}
+export { del, get, head, options, patch, post, put }
+
+export * from './types'
 
 export default request
 module.exports = request
