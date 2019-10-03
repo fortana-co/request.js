@@ -166,3 +166,26 @@ test('retry: no exception -> no retry', async t => {
     retry: { shouldRetry, retries: 3, delay: 125 },
   })
 })
+
+test('graphql', async t => {
+  const query = `
+{
+  continents {
+    name
+    code
+    countries {
+      name
+      code
+      currency
+    }
+  }
+}
+`
+  const { type, data } = await request('https://countries.trevorblades.com/', {
+    body: { query },
+    method: 'POST',
+  })
+  if (type === 'success') {
+    t.is(data.data.continents.length, 7)
+  }
+})

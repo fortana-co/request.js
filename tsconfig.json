@@ -6,8 +6,7 @@
     "noUnusedParameters": true,
     "esModuleInterop": true,
     "strict": true,
-    "outDir": ".",
-    "downlevelIteration": true
+    "outDir": "."
   },
   "include": ["*.ts"],
   "exclude": ["node_modules"]

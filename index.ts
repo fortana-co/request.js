@@ -29,7 +29,11 @@ const toQs = (params: {}, stringify: { (params: {}): string } = defaultStringify
 
 const toObject = (headers: Headers): { [propName: string]: string } => {
   const headersObject: { [key: string]: any } = {}
-  for (const pair of headers.entries()) headersObject[pair[0]] = pair[1]
+
+  // https://stackoverflow.com/questions/49218765/typescript-and-iterator-type-iterableiteratort-is-not-an-array-type
+  for (const [key, value] of Array.from(headers.entries())) {
+    headersObject[key] = value
+  }
   return headersObject
 }
 
