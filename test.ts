@@ -80,7 +80,7 @@ test('request: jsonOut false', async t => {
 
 test('request: response headers are object literal', async t => {
   const { headers } = (await request('https://httpbin.org/get')) as SuccessResponse
-  t.is(headers['content-encoding'], 'gzip')
+  t.is(headers['content-type'], 'application/json')
 })
 
 test('request: error', async t => {
@@ -128,7 +128,7 @@ test.cb('retry: retries on exception, increases delay', t => {
     }
     return type === 'exception'
   }
-  request('https://httpbin.smorg/get', { retry: { shouldRetry, delay: 125 } })
+  request('https://httpbin.smorg/get', { retry: { shouldRetry, retries: 4, delay: 125 } })
 })
 
 test('retry: eventually returns response', async t => {
@@ -153,7 +153,7 @@ test.cb('retry: retries on custom condition', t => {
     if (retries <= 1) t.end()
     return response.type !== 'exception' && response.status === 500
   }
-  request('https://httpbin.org/status/500', { retry: { shouldRetry, delay: 125 } })
+  request('https://httpbin.org/status/500', { retry: { shouldRetry, retries: 4, delay: 125 } })
 })
 
 test('retry: no exception -> no retry', async t => {

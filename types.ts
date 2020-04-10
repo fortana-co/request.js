@@ -27,8 +27,8 @@ export interface ExceptionResponse {
 export type Response<T = any, ET = any> = SuccessResponse<T> | ErrorResponse<ET> | ExceptionResponse
 
 export interface Retry<T = any, ET = any> {
-  retries?: number
-  delay?: number
+  retries: number
+  delay: number
   multiplier?: number
   shouldRetry?: (response: Response<T, ET>, retryInfo: { retries: number; delay: number }) => boolean
 }

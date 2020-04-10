@@ -110,7 +110,7 @@ const request = (async <T = any, ET = any>(url: string, options?: Options<T, ET>
   }
 
   if (retry) {
-    const { retries = 4, delay = 1000, multiplier = 2, shouldRetry = r => r.type === 'exception' }: Retry<T, ET> = retry
+    const { retries, delay, multiplier = 2, shouldRetry = r => r.type === 'exception' }: Retry<T, ET> = retry
     if (retries > 0 && shouldRetry(response, { retries, delay })) {
       await timeout(delay)
 
