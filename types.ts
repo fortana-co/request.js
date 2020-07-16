@@ -57,6 +57,7 @@ export interface Options<T = any, ET = any> {
   retry?: Retry<T, ET>
   stringify?: (obj?: {}) => string
   jsonOut?: boolean
+  timeout?: number
   [others: string]: any
 }
 

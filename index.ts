@@ -13,12 +13,19 @@ import {
 } from './types'
 const defaultStringify = require('./stringify')
 
-let fetch: (url: string, options?: {}) => Promise<Response>
 const req = (module: string): any => require(module)
-if (typeof window === 'undefined') fetch = req('node-fetch')
-else fetch = window.fetch
 
-const timeout = (ms: number): Promise<string> => {
+let fetch: (url: string, options?: {}) => Promise<Response>
+let AbortController: { new (): AbortController; prototype: AbortController }
+if (typeof window === 'undefined') {
+  fetch = req('node-fetch')
+  AbortController = req('abort-controller')
+} else {
+  fetch = window.fetch
+  AbortController = window.AbortController
+}
+
+const sleep = (ms: number): Promise<string> => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
@@ -46,6 +53,13 @@ const lowercased = (object: { [key: string]: any }): { [key: string]: any } => {
 const shouldStringify = (object: {}): boolean => {
   const objectType = {}.toString.call(object)
   return objectType === '[object Object]' || objectType === '[object Array]'
+}
+
+const getTimeoutSignal = (ms?: number) => {
+  if (!ms || !AbortController) return undefined
+  const controller = new AbortController()
+  setTimeout(() => controller.abort(), ms)
+  return controller.signal
 }
 
 async function _request(
@@ -79,16 +93,20 @@ async function _request(
 }
 
 /**
- * Returns response object with `data`, `type` (one of 'success', 'error', 'exception'),
- * along with other response properties.
+ * Sends request to URL and returns promise that resolves to a response object.
+ *
+ * @param url - Fully qualified URL
+ * @param options - Basically the fetch init object (see README for differences)
+ *
+ * @returns A promise that resolves to a response object
  */
-
 const request = (async <T = any, ET = any>(url: string, options?: Options<T, ET>): Promise<ReqResponse<T, ET>> => {
-  const { retry, jsonOut = true, ...rest } = options || ({} as Options)
+  const { retry, timeout, jsonOut = true, ...rest } = options || ({} as Options)
   let response: SuccessResponse<T> | ErrorResponse<ET> | ExceptionResponse, data
 
+  const signal = getTimeoutSignal(timeout)
   try {
-    const res = await _request(url, { jsonOut, ...rest })
+    const res = await _request(url, { jsonOut, signal, ...rest })
     const { status, statusText, headers: responseHeaders, url: responseUrl } = res
     const fields: BaseResponse = { status, statusText, headers: toObject(responseHeaders), url: responseUrl }
 
@@ -112,7 +130,7 @@ const request = (async <T = any, ET = any>(url: string, options?: Options<T, ET>
   if (retry) {
     const { retries, delay, multiplier = 2, shouldRetry = r => r.type === 'exception' }: Retry<T, ET> = retry
     if (retries > 0 && shouldRetry(response, { retries, delay })) {
-      await timeout(delay)
+      await sleep(delay)
 
       const nextRetry: Retry<T, ET> = {
         retries: retries - 1,
@@ -120,7 +138,7 @@ const request = (async <T = any, ET = any>(url: string, options?: Options<T, ET>
         multiplier,
         shouldRetry,
       }
-      return request(url, { retry: nextRetry, jsonOut, ...rest })
+      return request(url, { retry: nextRetry, timeout, jsonOut, ...rest })
     }
   }
   return response
