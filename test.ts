@@ -46,17 +46,17 @@ test('request: json body, including content-type header', async t => {
 })
 
 test('request: redirect', async t => {
-  const { data, status } = (await request('https://httpbin.org/redirect-to?url=get')) as SuccessResponse
-  t.is(data.url, 'https://httpbin.org/get')
+  const { url, status } = (await request('https://google.com/')) as SuccessResponse
+  t.is(url, 'https://www.google.com/')
   t.is(status, 200)
 })
 
 test('request: redirect manual', async t => {
-  const { type, status } = (await request('https://httpbin.org/redirect-to?url=get', {
+  const { type, status } = (await request('https://google.com/', {
     redirect: 'manual',
   })) as ErrorResponse
   t.is(type, 'error')
-  t.is(status, 302)
+  t.is(status, 301)
 })
 
 test('request: can override default content-type header, case insensitive', async t => {
@@ -143,6 +143,15 @@ test.cb('retry: callback style', t => {
     t.is(type, 'exception')
     t.end()
   })
+})
+
+test('timeout', async t => {
+  let response = await request('https://httpbin.org/get', { timeout: 10 })
+  t.is(response.type, 'exception')
+  t.is(response.data.name, 'AbortError')
+
+  response = await request('https://httpbin.org/get', { timeout: 10000 })
+  t.is(response.type, 'success')
 })
 
 test.cb('retry: retries on custom condition', t => {

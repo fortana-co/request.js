@@ -22,6 +22,7 @@ if (typeof window === 'undefined') {
   AbortController = req('abort-controller')
 } else {
   fetch = window.fetch
+  // @ts-ignore
   AbortController = window.AbortController
 }
 
