@@ -13,13 +13,12 @@ import {
 } from './types'
 const defaultStringify = require('./stringify')
 
-const req = (module: string): any => require(module)
-
+// Import `fetch` and `AbortController` if not in browser
 let fetch: (url: string, options?: {}) => Promise<Response>
 let AbortController: { new (): AbortController; prototype: AbortController }
 if (typeof window === 'undefined') {
-  fetch = req('node-fetch')
-  AbortController = req('abort-controller')
+  fetch = require('node-fetch')
+  AbortController = require('abort-controller')
 } else {
   fetch = window.fetch
   // @ts-ignore
@@ -122,6 +121,7 @@ const request = (async <T = any, ET = any>(url: string, options?: Options<T, ET>
       data = res
     }
 
+    // Any response without the data you're looking for (status >= 300) is an error
     if (status < 300) response = { ...fields, data, type: 'success' }
     else response = { ...fields, data, type: 'error' }
   } catch (e) {
@@ -129,7 +129,7 @@ const request = (async <T = any, ET = any>(url: string, options?: Options<T, ET>
   }
 
   if (retry) {
-    const { retries, delay, multiplier = 2, shouldRetry = r => r.type === 'exception' }: Retry<T, ET> = retry
+    const { retries, delay, multiplier = 2, shouldRetry = res => res.type === 'exception' }: Retry<T, ET> = retry
     if (retries > 0 && shouldRetry(response, { retries, delay })) {
       await sleep(delay)
 
