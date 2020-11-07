@@ -13,17 +13,10 @@ import {
 } from './types'
 const defaultStringify = require('./stringify')
 
-// Import `fetch` and `AbortController` if not in browser
-let fetch: (url: string, options?: {}) => Promise<Response>
-let AbortController: { new (): AbortController; prototype: AbortController }
-if (typeof window === 'undefined') {
-  fetch = require('node-fetch')
-  AbortController = require('abort-controller')
-} else {
-  fetch = window.fetch
-  // @ts-ignore
-  AbortController = window.AbortController
-}
+// @browser-ignore
+const fetch: (url: string, options?: {}) => Promise<Response> = require('node-fetch')
+const AbortController: { new (): AbortController; prototype: AbortController } = require('abort-controller')
+// @browser-ignore
 
 const sleep = (ms: number): Promise<string> => {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -56,7 +49,7 @@ const shouldStringify = (object: {}): boolean => {
 }
 
 const getTimeoutSignal = (ms?: number) => {
-  if (!ms || !AbortController) return undefined
+  if (!ms || typeof AbortController === 'undefined') return undefined
   const controller = new AbortController()
   setTimeout(() => controller.abort(), ms)
   return controller.signal

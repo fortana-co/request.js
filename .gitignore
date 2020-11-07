@@ -15,15 +15,16 @@
 # jest
 /coverage
 
-# typescript
-test.js
+# build
+index-browser.ts
 
 # misc
 .DS_Store
 .env
 
 *.js
-*.d.ts
 
 !prettierrc.js
+!prepare.js
+
 package-lock.json
