@@ -1,12 +1,8 @@
 {
   "name": "request-dot-js",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "author": "Kyle Bebak <kylebebak@gmail.com>",
-  "description": "A ~1kB wrapper around `fetch` with convenient error handling, automatic JSON transforms, and support for exponential backoff.",
-  "browser": {
-    "./index.js": "./index-browser.js",
-    "./index.ts": "./index-browser.ts"
-  },
+  "description": "A ~1kB fetch wrapper with convenient error handling, automatic JSON transforms, and support for exponential backoff.",
   "keywords": [
     "fetch",
     "request",
@@ -31,7 +27,7 @@
     "typescript": "^3.5.1"
   },
   "scripts": {
-    "prepare-browser": "node prepareBrowser.js && prettier --write index-browser.ts",
+    "prepare-browser": "node prepareBrowser.js && prettier --write index.ts",
     "build": "yarn test",
     "test": "yarn prepare-browser && tsc && yarn prettier-check && ava -v",
     "prettier-check": "prettier --check *.ts",

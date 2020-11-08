@@ -16,7 +16,7 @@
 /coverage
 
 # build
-index-browser.ts
+index.ts
 
 # misc
 .DS_Store

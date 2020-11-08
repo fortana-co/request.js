@@ -1,5 +1,5 @@
 import test from 'ava'
-import request, { del, get, post, Retry, SuccessResponse, ErrorResponse, ExceptionResponse, Response } from './index'
+import request, { del, get, post, Retry, SuccessResponse, ErrorResponse, ExceptionResponse, Response } from './server'
 
 test('request: type, status, statusText, url and default headers', async t => {
   interface SuccessData {
