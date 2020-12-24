@@ -41,14 +41,14 @@ If no exception is thrown, `data` is read from the response stream. If `status <
 
 If there's a connection error, timeout, or other exception, type is `'exception'`, and `data` is the exception thrown by fetch.
 
-The other attributes come from the `Response` object returned by fetch:
+The other properties come from the `Response` object returned by fetch:
 
 - `status`: 200, 204, etc...
 - `statusText`: 'OK', 'CREATED', etc...
 - `url`: url after redirect(s)
 - `headers`: object literal instead of `Headers` instance; header names are lowercased
 
-If type is `'exception'`, these attributes are undefined.
+If type is `'exception'`, these properties are undefined.
 
 ### JSON by default
 
@@ -148,7 +148,7 @@ const { data, type } = await request('https://httpbin.org/get', { params: { a: '
 
 ### TypeScript
 
-**request.js** ships with [TypeScript declarations](https://github.com/fortana-co/request.js/blob/master/index.d.ts) and works great with TypeScript. [Check out examples here](https://github.com/fortana-co/request.js/blob/master/test.ts).
+**request.js** works great with TypeScript (it's written in TypeScript). [Check out examples here](https://github.com/fortana-co/request.js/blob/master/test.ts).
 
 Make sure you enable `esModuleInterop` if you're using TypeScript to compile your application. This option is enabled by default if you run `tsc --init`.
 
@@ -203,4 +203,4 @@ If you use **request.js** on the server, [node-fetch](https://github.com/bitinn/
 
 ## Development and tests
 
-Clone the repo, then `yarn`, then `npm run test`.
+Clone the repo, then `yarn`, then `yarn test`.
