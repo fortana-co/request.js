@@ -180,6 +180,14 @@ Do this instead:
 import { del } from 'request-dot-js'
 ```
 
+### On the server
+
+**request.js** ships with a module that works in the browser, `index.js`, and a module that works on the server, `server.js`. If you're using it on the server, make sure to import everything from `server.js`.
+
+```ts
+import request from 'request-dot-js/server'
+```
+
 ## Why request.js?
 
 Why not axios, or just fetch? Unlike fetch, **request.js** is very convenient to use:
