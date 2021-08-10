@@ -1,7 +1,7 @@
 # request.js
 
-[![NPM](https://img.shields.io/npm/v/request-dot-js.svg)](https://www.npmjs.com/package/request.js)
-[![npm bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/request-dot-js.svg)](https://www.npmjs.com/package/request.js)
+[![NPM](https://img.shields.io/npm/v/request-dot-js.svg)](https://www.npmjs.com/package/request-dot-js)
+[![npm bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/request-dot-js.svg)](https://www.npmjs.com/package/request-dot-js)
 
 A ~1kB wrapper around `fetch` with convenient error handling, automatic JSON transforms, and support for request timeouts and exponential backoff.
 
