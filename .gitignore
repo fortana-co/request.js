@@ -25,6 +25,6 @@ index.ts
 *.js
 
 !prettierrc.js
-!prepare.js
+!prepareBrowser.js
 
 package-lock.json
