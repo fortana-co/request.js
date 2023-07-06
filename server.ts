@@ -118,7 +118,7 @@ const request = (async <T = any, ET = any>(url: string, options?: Options<T, ET>
     if (status < 300) response = { ...fields, data, type: 'success' }
     else response = { ...fields, data, type: 'error' }
   } catch (e) {
-    response = { data: e, type: 'exception' }
+    response = { data: e as Error, type: 'exception' }
   }
 
   if (retry) {
