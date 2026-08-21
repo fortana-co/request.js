@@ -1,5 +1,5 @@
 // based on: https://github.com/Gozala/querystring/blob/master/encode.js
-const stringifyPrimitive = function(v: any): string | number {
+const stringifyPrimitive = function (v: any): string | number {
   switch (typeof v) {
     case 'string':
       return v
@@ -15,19 +15,19 @@ const stringifyPrimitive = function(v: any): string | number {
   }
 }
 
-module.exports = function(obj: any): string {
+module.exports = function (obj: any): string {
   if (!obj) return ''
 
   const sep = '&'
   const eq = '='
 
   return Object.keys(obj)
-    .map(function(k) {
+    .map(function (k) {
       const ks = encodeURIComponent(stringifyPrimitive(k)) + eq
 
       if (Array.isArray(obj[k])) {
         return obj[k]
-          .map(function(v: any) {
+          .map(function (v: any) {
             return ks + encodeURIComponent(stringifyPrimitive(v))
           })
           .join(sep)

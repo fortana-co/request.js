@@ -1,13 +1,5 @@
-#vscode config
-/.vscode
-
 # dependencies
 /node_modules
-/website/node_modules
-
-## docs
-/website/i18n
-/website/build
 
 # production
 /dist
@@ -24,7 +16,4 @@ index.ts
 
 *.js
 
-!prettierrc.js
 !prepareBrowser.js
-
-package-lock.json

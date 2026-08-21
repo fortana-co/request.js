@@ -211,4 +211,4 @@ If you use **request.js** on the server, [node-fetch](https://github.com/bitinn/
 
 ## Development and tests
 
-Clone the repo, then `yarn`, then `yarn test`.
+Clone the repo, then `npm install`, then `npm test`.
